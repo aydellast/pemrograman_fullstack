@@ -1,17 +1,20 @@
 const db = require('../config/database');
 
 // ambil profil user
-exports.getUserById = (id) => {
-  return db.promise().query(
+exports.getUserById = async (id) => {
+  const [rows] = await db.promise().query(
     'SELECT id_user, username, email FROM users WHERE id_user = ?',
     [id]
   );
+  return [rows];
 };
 
 // update profil user
-exports.updateUser = (id, data) => {
-  return db.promise().query(
-    'UPDATE users SET username=?, email=?, password=? WHERE id_user=?',
-    [data.username, data.email, data.password, id]
+exports.updateUser = async (id, data) => {
+  const { username, email, password } = data;
+
+  await db.promise().query(
+    'UPDATE users SET username = ?, email = ?, password = ? WHERE id_user = ?',
+    [username, email, password, id]
   );
 };
