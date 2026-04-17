@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const port = 3000;
 
+app.use(express.json());
+
 // Import file koneksi database (Tambahan Sprint 4)
 const db = require('./config/database'); 
 
@@ -9,11 +11,13 @@ const db = require('./config/database');
 const apiRouter = require('./routes/api'); 
 const transactionRoutes = require('./routes/transactions');
 const userRoutes = require('./routes/users');
+const manajemenUserRoutes = require('./routes/manajemenUserRoutes');
 
 // Daftarkan rutenya di sini
 app.use('/', apiRouter); 
 app.use('/transactions', transactionRoutes); 
 app.use('/users', userRoutes); 
+app.use('/api/users', manajemenUserRoutes);
 
 // ==========================================
 // ENDPOINT KHUSUS TESTING DATABASE (Tugas Sprint 4)
