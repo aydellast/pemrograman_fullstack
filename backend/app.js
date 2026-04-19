@@ -15,12 +15,14 @@ const apiRouter = require('./routes/apiRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const userRoutes = require('./routes/userRoutes');
 const manajemenUserRoutes = require('./routes/manajemenUserRoutes');
+const budgetRoutes = require('./routes/budgetRoutes');
 
 // Daftarkan routes
 app.use('/', apiRouter); 
 app.use('/transactions', transactionRoutes); 
 app.use('/users', userRoutes);          // login & register
 app.use('/api/users', manajemenUserRoutes); // profil user
+app.use('/api/budgets', budgetRoutes);
 
 // ==========================================
 // TEST DATABASE
