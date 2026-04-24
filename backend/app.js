@@ -17,12 +17,17 @@ const userRoutes = require('./routes/userRoutes');
 const manajemenUserRoutes = require('./routes/manajemenUserRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
 
+const historyRoutes = require('./routes/historyRoutes');
+const savingGoalRoutes = require('./routes/savingGoalRoutes');
+
 // Daftarkan routes
 app.use('/', apiRouter); 
 app.use('/transactions', transactionRoutes); 
 app.use('/users', userRoutes);          // login & register
 app.use('/api/users', manajemenUserRoutes); // profil user
 app.use('/api/budgets', budgetRoutes);
+app.use('/api/history', historyRoutes);
+app.use('/api/saving-goals', savingGoalRoutes);
 
 // ==========================================
 // TEST DATABASE
