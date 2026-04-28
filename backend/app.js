@@ -19,6 +19,9 @@ const budgetRoutes = require('./routes/budgetRoutes');
 
 const historyRoutes = require('./routes/historyRoutes');
 const savingGoalRoutes = require('./routes/savingGoalRoutes');
+const incomeRoutes = require('./routes/incomeRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+
 
 // Daftarkan routes
 app.use('/', apiRouter); 
@@ -28,6 +31,8 @@ app.use('/api/users', manajemenUserRoutes); // profil user
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/saving-goals', savingGoalRoutes);
+app.use('/api/income', incomeRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // ==========================================
 // TEST DATABASE
