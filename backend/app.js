@@ -2,30 +2,37 @@ const express = require("express");
 const app = express();
 const port = 3000;
 
-// 1. TAMBAHKAN MIDDLEWARE INI (Wajib di bagian atas sebelum route)
+// Middleware agar bisa membaca JSON
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 
-// Import file koneksi database
+// Import koneksi database
 const db = require('./config/database'); 
 
-// Import file routes
-const apiRouter = require('./routes/api'); 
-const transactionRoutes = require('./routes/transactions');
-const userRoutes = require('./routes/users');
-const expenseRoutes = require('./routes/expenses');
+// --- BAGIAN ROUTE ---
+// 1. Memanggil apiRoutes.js
+const apiRouter = require('./routes/apiRoutes'); 
 
-// 2. DAFTARKAN ROUTE DENGAN PREFIX /api AGAR KONSISTEN
+// 2. Memanggil transactionRoutes.js
+const transactionRoutes = require('./routes/transactionRoutes');
+
+// 3. Memanggil userRoutes.js
+const userRoutes = require('./routes/userRoutes');
+
+// 4. Memanggil expensesRoutes.js (Fitur Meisha)
+const expenseRoutes = require('./routes/expensesRoutes'); 
+
+// --- MENDAFTARKAN ROUTE ---
 app.use('/api', apiRouter); 
 app.use('/transactions', transactionRoutes); 
 app.use('/users', userRoutes); 
 app.use('/expenses', expenseRoutes);
 
-// ENDPOINT KHUSUS TESTING DATABASE
+// Endpoint testing database
 app.get("/test-db", (req, res) => {
     db.query("SELECT 1 + 1 AS solution", (err, result) => {
         if (err) {
-            res.json({ message: "Koneksi database gagal ❌", error: err });
+            res.status(500).json({ message: "Koneksi database gagal ❌", error: err });
         } else {
             res.json({ message: "Koneksi database berhasil 100%! ✅", result: result });
         }
