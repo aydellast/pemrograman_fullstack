@@ -8,6 +8,7 @@ const db = require('./config/database');
 app.use(express.json());
 // Middleware untuk membaca data dari form-data (penting untuk Sprint 7: Upload File)
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
 
 // SPRINT 7: Menyediakan akses publik ke folder uploads agar bukti pengeluaran bisa diakses lewat browser
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

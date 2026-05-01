@@ -1,11 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/manajemenUserController');
+const verifyToken = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
-// GET profil
-router.get('/:id', userController.getProfile);
+// GET PROFILE
+router.get('/profile', verifyToken, userController.getProfile);
 
-// UPDATE profil
-router.put('/:id', userController.updateProfile);
+// UPDATE PROFILE + UPLOAD FOTO
+router.put(
+  '/profile',
+  verifyToken,
+  upload.single('profile_picture'), 
+  userController.updateProfile
+);
 
 module.exports = router;
