@@ -55,22 +55,23 @@ exports.createBudget = async (data) => {
 
 
 // UPDATE
-exports.updateBudget = async (id, data) => {
+exports.updateBudget = async (id, id_user, data) => {
   const { id_category, amount, start_date, end_date } = data;
 
   return db.promise().query(
     `UPDATE budgets 
      SET id_category=?, amount=?, start_date=?, end_date=?
-     WHERE id_budget=?`,
-    [id_category, amount, start_date, end_date, id]
+     WHERE id_budget=? AND id_user=?`,
+    [id_category, amount, start_date, end_date, id, id_user]
   );
 };
 
 
 // DELETE
-exports.deleteBudget = async (id) => {
+exports.deleteBudget = async (id, id_user) => {
   return db.promise().query(
-    `DELETE FROM budgets WHERE id_budget=?`,
-    [id]
+    `DELETE FROM budgets 
+     WHERE id_budget=? AND id_user=?`,
+    [id, id_user]
   );
 };

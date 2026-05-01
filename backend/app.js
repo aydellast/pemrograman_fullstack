@@ -4,6 +4,7 @@ const port = 3000;
 
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
 
 // Import koneksi database
 const db = require('./config/database'); 
@@ -26,6 +27,7 @@ app.use('/api', apiRouter);
 app.use('/transactions', transactionRoutes); 
 app.use('/users', userRoutes); 
 app.use('/expenses', expenseRoutes);
+app.use('/api/users', manajemenUserRoutes);
 
 // Endpoint testing database
 const historyRoutes = require('./routes/historyRoutes');
