@@ -1,68 +1,52 @@
-<<<<<<< HEAD
 const db = require('../config/database');
 
 const dashboardController = {
-    getSummary: (req, res) => {
-        const { id_user } = req.params;
-        
-        const query = `
-            SELECT 
-                SUM(CASE WHEN c.type = 'Income' THEN t.amount ELSE 0 END) as total_income,
-                SUM(CASE WHEN c.type = 'Expense' THEN t.amount ELSE 0 END) as total_expense
+    getChartData: (req, res) => {
+        // 1. Query untuk menghitung Total Pemasukan (Income)
+        const queryIncome = `
+            SELECT SUM(t.amount) AS total_income 
             FROM transactions t
             JOIN categories c ON t.id_category = c.id_category
-            WHERE t.id_user = ?`;
+            WHERE c.type = 'Income'
+        `;
 
-        db.query(query, [id_user], (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
+        // 2. Query untuk menghitung Total Pengeluaran (Expense)
+        const queryExpense = `
+            SELECT SUM(t.amount) AS total_expense 
+            FROM transactions t
+            JOIN categories c ON t.id_category = c.id_category
+            WHERE c.type = 'Expense'
+        `;
+
+        // Eksekusi Query Pertama (Pemasukan)
+        db.query(queryIncome, (err, incomeResult) => {
+            if (err) return res.status(500).json({ message: "Gagal mengambil data pemasukan", error: err.message });
             
-            const summary = results[0];
-            const balance = (summary.total_income || 0) - (summary.total_expense || 0);
-            
-            res.json({
-                message: "Data dashboard berhasil dimuat",
-                data: {
-                    total_income: summary.total_income || 0,
-                    total_expense: summary.total_expense || 0,
-                    balance: balance
-                }
+            // Ambil angkanya, jika null/kosong jadikan 0
+            const totalIncome = incomeResult[0].total_income || 0;
+
+            // Eksekusi Query Kedua (Pengeluaran)
+            db.query(queryExpense, (err, expenseResult) => {
+                if (err) return res.status(500).json({ message: "Gagal mengambil data pengeluaran", error: err.message });
+                
+                // Ambil angkanya, jika null/kosong jadikan 0
+                const totalExpense = expenseResult[0].total_expense || 0;
+                
+                // Hitung sisa saldo
+                const balance = totalIncome - totalExpense;
+
+                // Kirim hasil akhir ke Frontend/Postman
+                res.status(200).json({
+                    message: "Data rekapitulasi grafik berhasil diambil 📊",
+                    data: {
+                        total_income: Number(totalIncome),
+                        total_expense: Number(totalExpense),
+                        balance: Number(balance)
+                    }
+                });
             });
         });
     }
 };
 
-=======
-const db = require('../config/database');
-
-const dashboardController = {
-    getSummary: (req, res) => {
-        const { id_user } = req.params;
-        
-        const query = `
-            SELECT 
-                SUM(CASE WHEN c.type = 'Income' THEN t.amount ELSE 0 END) as total_income,
-                SUM(CASE WHEN c.type = 'Expense' THEN t.amount ELSE 0 END) as total_expense
-            FROM transactions t
-            JOIN categories c ON t.id_category = c.id_category
-            WHERE t.id_user = ?`;
-
-        db.query(query, [id_user], (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
-            
-            const summary = results[0];
-            const balance = (summary.total_income || 0) - (summary.total_expense || 0);
-            
-            res.json({
-                message: "Data dashboard berhasil dimuat",
-                data: {
-                    total_income: summary.total_income || 0,
-                    total_expense: summary.total_expense || 0,
-                    balance: balance
-                }
-            });
-        });
-    }
-};
-
->>>>>>> 2242bcf8c7c87a440b14f1b1cbd8db7de020a6ff
 module.exports = dashboardController;

@@ -13,7 +13,6 @@ router.post('/register', userController.register);
 router.post('/login', userController.login);
 
 // 2. BIKIN RUTE BARU YANG DIJAGA SATPAM
-// Perhatikan ada 'verifyToken' di tengah-tengah! Artinya sebelum fungsi dijalankan, harus lewat Satpam dulu.
 router.get('/profile', verifyToken, (req, res) => {
     // Kalau berhasil lewat satpam, kodingan ini baru akan dijalankan
     res.status(200).json({

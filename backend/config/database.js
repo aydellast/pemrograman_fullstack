@@ -4,10 +4,10 @@ require('dotenv').config();
 // PERBAIKAN: Gunakan createPool, bukan createConnection
 const db = mysql.createPool({
     host: '127.0.0.1',
-    port: 3307, // Pastikan port ini sesuai dengan setting di XAMPP/MySQL kamu
     user: 'root',
+    port: 3306,
     password: '',
-    database: 'cuppycash_final',
+    database: 'cuppycash_db',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0

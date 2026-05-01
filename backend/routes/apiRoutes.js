@@ -25,6 +25,6 @@ router.delete('/expenses/:id', expenseController.deleteExpense);
 // ROUTE UNTUK FITUR DASHBOARD
 // ==========================================
 // Ambil ringkasan (Total Income, Total Expense, Balance) berdasarkan ID User
-router.get('/dashboard/summary/:id_user', dashboardController.getSummary);
+router.get('/dashboard/summary/:id_user', dashboardController.getChartData);
 
 module.exports = router;
