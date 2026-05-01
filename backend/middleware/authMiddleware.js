@@ -15,14 +15,15 @@ const verifyToken = (req, res, next) => {
     }
 
     try {
-        // 3. Satpam mengecek keaslian token menggunakan Kunci Rahasia
-        const secretKey = process.env.JWT_SECRET || 'rahasia_cuppycash_super_aman';
+        // 3. Satpam mengecek keaslian token menggunakan Kunci Rahasia yang SAMA
+        // Ganti baris di bawah ini agar menggunakan 'RAHASIA_TOKEN'
+        const secretKey = process.env.JWT_SECRET || 'RAHASIA_TOKEN'; 
         const verified = jwt.verify(token, secretKey);
         
-        // 4. Kalau asli, catat identitas user (id_user & email) lalu persilakan masuk
+        // 4. Kalau asli, catat identitas user
         req.user = verified; 
         
-        next(); // Perintah untuk "Silakan lewat ke proses selanjutnya"
+        next(); 
     } catch (err) {
         // Kalau tokennya kedaluwarsa atau palsu
         res.status(400).json({ message: "Token tidak valid atau sudah kedaluwarsa! Silakan login ulang." });

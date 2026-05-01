@@ -1,68 +1,43 @@
-<<<<<<< HEAD
-const db = require('../config/database');
+const db = require('../config/database'); 
+ 
+const dashboardController = { 
+    getSummary: async (req, res) => { 
+        try { 
+            // SPRINT 6: Langsung ambil ID dari Token (Meisha tidak perlu input ID manual lagi)
+            const id_user = req.user.id; 
+ 
+            // Query untuk menghitung total income dan expense secara otomatis
+            const query = ` 
+                SELECT  
+                    SUM(CASE WHEN c.type = 'Income' THEN t.amount ELSE 0 END) AS total_income, 
+                    SUM(CASE WHEN c.type = 'Expense' THEN t.amount ELSE 0 END) AS total_expense 
+                FROM transactions t 
+                JOIN categories c ON t.id_category = c.id_category 
+                WHERE t.id_user = ? 
+            `; 
+ 
+            db.query(query, [id_user], (err, results) => { 
+                if (err) throw err; 
+                 
+                // SPRINT 5: Validasi agar data null berubah jadi 0 (mencegah error di tampilan)
+                const income = results[0].total_income || 0; 
+                const expense = results[0].total_expense || 0; 
+                const balance = income - expense; 
+ 
+                res.status(200).json({ 
+                    message: "Data ringkasan dashboard berhasil ditarik 📊", 
+                    data: { 
+                        total_income: income, 
+                        total_expense: expense, 
+                        balance: balance 
+                    } 
+                }); 
+            }); 
+        } catch (error) { 
+            // SPRINT 5: Error handling agar aplikasi tetap stabil
+            res.status(500).json({ message: "Gagal menarik data dashboard", error: error.message }); 
+        } 
+    } 
+}; 
 
-const dashboardController = {
-    getSummary: (req, res) => {
-        const { id_user } = req.params;
-        
-        const query = `
-            SELECT 
-                SUM(CASE WHEN c.type = 'Income' THEN t.amount ELSE 0 END) as total_income,
-                SUM(CASE WHEN c.type = 'Expense' THEN t.amount ELSE 0 END) as total_expense
-            FROM transactions t
-            JOIN categories c ON t.id_category = c.id_category
-            WHERE t.id_user = ?`;
-
-        db.query(query, [id_user], (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
-            
-            const summary = results[0];
-            const balance = (summary.total_income || 0) - (summary.total_expense || 0);
-            
-            res.json({
-                message: "Data dashboard berhasil dimuat",
-                data: {
-                    total_income: summary.total_income || 0,
-                    total_expense: summary.total_expense || 0,
-                    balance: balance
-                }
-            });
-        });
-    }
-};
-
-=======
-const db = require('../config/database');
-
-const dashboardController = {
-    getSummary: (req, res) => {
-        const { id_user } = req.params;
-        
-        const query = `
-            SELECT 
-                SUM(CASE WHEN c.type = 'Income' THEN t.amount ELSE 0 END) as total_income,
-                SUM(CASE WHEN c.type = 'Expense' THEN t.amount ELSE 0 END) as total_expense
-            FROM transactions t
-            JOIN categories c ON t.id_category = c.id_category
-            WHERE t.id_user = ?`;
-
-        db.query(query, [id_user], (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
-            
-            const summary = results[0];
-            const balance = (summary.total_income || 0) - (summary.total_expense || 0);
-            
-            res.json({
-                message: "Data dashboard berhasil dimuat",
-                data: {
-                    total_income: summary.total_income || 0,
-                    total_expense: summary.total_expense || 0,
-                    balance: balance
-                }
-            });
-        });
-    }
-};
-
->>>>>>> 2242bcf8c7c87a440b14f1b1cbd8db7de020a6ff
 module.exports = dashboardController;

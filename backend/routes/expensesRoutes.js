@@ -1,12 +1,10 @@
 const express = require('express');
 const router = express.Router();
-
-// Import Controller (Pastikan path ../ benar)
 const expenseController = require('../controllers/expenseController');
+const verifyToken = require('../middleware/authMiddleware'); 
+const upload = require('../middleware/uploadMiddleware'); 
 
-// Daftar Route Expense
-router.get('/', expenseController.getAllExpenses);
-router.post('/', expenseController.addExpense);
-router.delete('/:id', expenseController.deleteExpense);
+
+router.post('/', verifyToken, upload.single('bukti_pengeluaran'), expenseController.addExpense);
 
 module.exports = router;

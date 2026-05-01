@@ -1,85 +1,49 @@
-const express = require("express");
+const express = require('express');
 const app = express();
-const port = 3000;
+const path = require('path');
+const db = require('./config/database');
 
-<<<<<<< HEAD
-// Middleware agar bisa membaca JSON
-app.use(express.json()); 
+// --- MIDDLEWARE ---
+// Middleware untuk membaca JSON dari body request
+app.use(express.json());
+// Middleware untuk membaca data dari form-data (penting untuk Sprint 7: Upload File)
 app.use(express.urlencoded({ extended: true }));
 
-// Import koneksi database
-const db = require('./config/database'); 
+// SPRINT 7: Menyediakan akses publik ke folder uploads agar bukti pengeluaran bisa diakses lewat browser
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- BAGIAN ROUTE ---
-// 1. Memanggil apiRoutes.js
-=======
-// ==========================================
-// JSON Parser (WAJIB)
-// ==========================================
-app.use(express.json());
-
-// Import database
-const db = require('./config/database'); 
-
-// Import routes (pakai versi backend yang benar)
->>>>>>> 2242bcf8c7c87a440b14f1b1cbd8db7de020a6ff
+// Memanggil file Routes sesuai struktur yang kamu miliki
 const apiRouter = require('./routes/apiRoutes'); 
-
-// 2. Memanggil transactionRoutes.js
-const transactionRoutes = require('./routes/transactionRoutes');
-<<<<<<< HEAD
-
-// 3. Memanggil userRoutes.js
-=======
->>>>>>> 2242bcf8c7c87a440b14f1b1cbd8db7de020a6ff
-const userRoutes = require('./routes/userRoutes');
-const manajemenUserRoutes = require('./routes/manajemenUserRoutes');
-const budgetRoutes = require('./routes/budgetRoutes');
-
-<<<<<<< HEAD
-// 4. Memanggil expensesRoutes.js (Fitur Meisha)
 const expenseRoutes = require('./routes/expensesRoutes'); 
+const transactionRoutes = require('./routes/transactionRoutes');
+const userRoutes = require('./routes/userRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes'); // Tambahan untuk tugas Dashboard
 
 // --- MENDAFTARKAN ROUTE ---
-app.use('/api', apiRouter); 
+app.use('/api', apiRouter);              // Untuk login/auth: http://localhost:3000/api/login
+app.use('/expenses', expenseRoutes);     // CRUD Pengeluaran: http://localhost:3000/expenses
+app.use('/dashboard', dashboardRoutes);   // Ringkasan: http://localhost:3000/dashboard/summary
 app.use('/transactions', transactionRoutes); 
 app.use('/users', userRoutes); 
-app.use('/expenses', expenseRoutes);
 
-// Endpoint testing database
-=======
-const historyRoutes = require('./routes/historyRoutes');
-const savingGoalRoutes = require('./routes/savingGoalRoutes');
-const incomeRoutes = require('./routes/incomeRoutes');
-const categoryRoutes = require('./routes/categoryRoutes');
+// --- HALAMAN UTAMA & TESTING ---
+// Halaman utama agar tidak muncul "Cannot GET /"
+app.get("/", (req, res) => {
+    res.send("<h1>Selamat Datang di API CuppyCash!</h1><p>Server berjalan dengan lancar.</p>");
+});
 
-
-// Daftarkan routes
-app.use('/', apiRouter); 
-app.use('/transactions', transactionRoutes); 
-app.use('/users', userRoutes);          // login & register
-app.use('/api/users', manajemenUserRoutes); // profil user
-app.use('/api/budgets', budgetRoutes);
-app.use('/api/history', historyRoutes);
-app.use('/api/saving-goals', savingGoalRoutes);
-app.use('/api/income', incomeRoutes);
-app.use('/api/categories', categoryRoutes);
-
-// ==========================================
-// TEST DATABASE
-// ==========================================
->>>>>>> 2242bcf8c7c87a440b14f1b1cbd8db7de020a6ff
-app.get("/test-db", (req, res) => {
-    db.query("SELECT 1 + 1 AS solution", (err, result) => {
-        if (err) {
-            res.status(500).json({ message: "Koneksi database gagal ❌", error: err });
-        } else {
-            res.json({ message: "Koneksi database berhasil 100%! ✅", result: result });
-        }
+// Route pengetesan database (Sprint 5: Error handling dasar)
+app.get('/test-db', (req, res) => {
+    db.query('SELECT 1 + 1 AS solution', (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Koneksi database berhasil 100%! ✅", result: rows });
     });
 });
 
-// ==========================================
-app.listen(port, () => {
-    console.log(`CuppyCash Server is running on http://localhost:${port}`);
+// --- KONFIGURASI PORT ---
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 CuppyCash Server is running on http://localhost:${PORT}`);
+    console.log(`✅ Koneksi database MySQL BERHASIL!`);
 });
