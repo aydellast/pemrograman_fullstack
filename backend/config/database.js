@@ -1,7 +1,6 @@
 const mysql = require('mysql2');
 require('dotenv').config();
 
-// PERBAIKAN: Gunakan createPool, bukan createConnection
 const db = mysql.createPool({
     host: '127.0.0.1',
     user: 'root',
@@ -13,13 +12,12 @@ const db = mysql.createPool({
     queueLimit: 0
 });
 
-// Test koneksi di terminal
 db.getConnection((err, connection) => {
     if (err) {
-        console.log("Koneksi database gagal: ", err);
+        console.log("Koneksi database gagal: ", err.message);
     } else {
-        console.log("Koneksi database MySQL BERHASIL!");
-        connection.release(); // Melepaskan koneksi kembali ke pool
+        console.log("Koneksi database MySQL BERHASIL ke: " + (process.env.DB_NAME || 'cuppycash_db'));
+        connection.release();
     }
 });
 
