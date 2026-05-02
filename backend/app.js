@@ -58,6 +58,12 @@ app.get("/test-db", (req, res) => {
     });
 });
 
+const errorHandler = require('./utils/errorHandler');
+app.use(errorHandler);
+
+const chartRoutes = require('./routes/chartRoutes');
+app.use('/api', chartRoutes);
+
 app.listen(port, () => {
     console.log(`CuppyCash Server is running on http://localhost:${port}`);
 });
