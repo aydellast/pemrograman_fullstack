@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const incomeController = require('../controllers/incomeController');
-const verifyToken = require('../middleware/auth'); // ini middleware kamu
+const verifyToken = require('../middleware/authMiddleware');
 
 // ==========================
 // CRUD INCOME + AUTH
