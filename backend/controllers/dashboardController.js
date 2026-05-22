@@ -1,52 +1,46 @@
 const db = require('../config/database');
 
-const dashboardController = {
-    getChartData: (req, res) => {
-        // 1. Query untuk menghitung Total Pemasukan (Income)
-        const queryIncome = `
-            SELECT SUM(t.amount) AS total_income 
-            FROM transactions t
-            JOIN categories c ON t.id_category = c.id_category
-            WHERE c.type = 'Income'
+exports.getSummary = (req, res) => {
+    try {
+
+        const id_user = req.user.id_user;
+
+        const query = `
+            SELECT 
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS total_income,
+                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS total_expense
+            FROM transactions
+            WHERE id_user = ?
         `;
 
-        // 2. Query untuk menghitung Total Pengeluaran (Expense)
-        const queryExpense = `
-            SELECT SUM(t.amount) AS total_expense 
-            FROM transactions t
-            JOIN categories c ON t.id_category = c.id_category
-            WHERE c.type = 'Expense'
-        `;
-
-        // Eksekusi Query Pertama (Pemasukan)
-        db.query(queryIncome, (err, incomeResult) => {
-            if (err) return res.status(500).json({ message: "Gagal mengambil data pemasukan", error: err.message });
-            
-            // Ambil angkanya, jika null/kosong jadikan 0
-            const totalIncome = incomeResult[0].total_income || 0;
-
-            // Eksekusi Query Kedua (Pengeluaran)
-            db.query(queryExpense, (err, expenseResult) => {
-                if (err) return res.status(500).json({ message: "Gagal mengambil data pengeluaran", error: err.message });
-                
-                // Ambil angkanya, jika null/kosong jadikan 0
-                const totalExpense = expenseResult[0].total_expense || 0;
-                
-                // Hitung sisa saldo
-                const balance = totalIncome - totalExpense;
-
-                // Kirim hasil akhir ke Frontend/Postman
-                res.status(200).json({
-                    message: "Data rekapitulasi grafik berhasil diambil 📊",
-                    data: {
-                        total_income: Number(totalIncome),
-                        total_expense: Number(totalExpense),
-                        balance: Number(balance)
-                    }
+        db.query(query, [id_user], (err, result) => {
+            if (err) {
+                return res.status(500).json({
+                    message: "Database error",
+                    error: err.message
                 });
+            }
+
+            const data = result[0];
+
+            const income = data.total_income || 0;
+            const expense = data.total_expense || 0;
+            const balance = income - expense;
+
+            res.json({
+                message: "Dashboard summary berhasil",
+                data: {
+                    total_income: income,
+                    total_expense: expense,
+                    balance: balance
+                }
             });
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error",
+            error: error.message
         });
     }
 };
-
-module.exports = dashboardController;

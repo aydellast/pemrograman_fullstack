@@ -1,14 +1,87 @@
 const userModel = require('../models/manajemenUserModel');
+const jwt = require('jsonwebtoken');
 
-
-// GET PROFILE
-exports.getProfile = async (req, res) => {
+// ==============================
+// REGISTER
+// ==============================
+exports.register = async (req, res) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
+    const { username, email, password } = req.body;
+
+    await userModel.create({
+      username,
+      email,
+      password
+    });
+
+    res.status(201).json({
+      message: "Registrasi berhasil! Silakan login."
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal register",
+      error: error.message
+    });
+  }
+};
+
+// ==============================
+// LOGIN
+// ==============================
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const users = await userModel.findByEmail(email);
+
+    if (users.length === 0 || users[0].password !== password) {
+      return res.status(401).json({
+        message: "Email atau password salah!"
+      });
     }
 
-    const [rows] = await userModel.getUserById(req.user.id_user);
+    const user = users[0];
+
+    const secretKey =
+      process.env.JWT_SECRET || 'rahasia_cuppycash_super_aman';
+
+    const token = jwt.sign(
+      {
+        id: user.id_user,
+        id_user: user.id_user,
+        email: user.email
+      },
+      secretKey,
+      { expiresIn: '1h' }
+    );
+
+    res.json({
+      message: "Login berhasil!",
+      token
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Terjadi kesalahan di server",
+      error: error.message
+    });
+  }
+};
+
+// ==============================
+// GET PROFILE
+// ==============================
+exports.getProfile = async (req, res) => {
+  try {
+
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized"
+      });
+    }
+
+    const rows = await userModel.getUserById(req.user.id_user);
 
     if (rows.length === 0) {
       return res.status(404).json({
@@ -31,22 +104,26 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-
+// ==============================
 // UPDATE PROFILE + UPLOAD FOTO
+// ==============================
 exports.updateProfile = async (req, res) => {
   try {
+
     if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({
+        message: "Unauthorized"
+      });
     }
 
     const { username, email, password } = req.body;
 
-    // ambil file dari multer
-    const profile_picture = req.file ? req.file.filename : null;
+    // ambil file upload dari multer
+    let profile_picture = null;
 
-    // DEBUG (boleh dihapus nanti)
-    console.log("BODY:", req.body);
-    console.log("FILE:", req.file);
+    if (req.file) {
+      profile_picture = req.file.filename;
+    }
 
     // VALIDASI
     if (!username || !email) {
@@ -71,7 +148,7 @@ exports.updateProfile = async (req, res) => {
       username,
       email,
       password,
-      profile_picture 
+      profile_picture
     });
 
     res.json({

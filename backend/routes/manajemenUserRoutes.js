@@ -4,6 +4,10 @@ const userController = require('../controllers/manajemenUserController');
 const verifyToken = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
+
+router.post('/register', userController.register);
+router.post('/login', userController.login);
+
 // GET PROFILE
 router.get('/profile', verifyToken, userController.getProfile);
 

@@ -1,30 +1,24 @@
+// routes/apiRoutes.js
 const express = require('express');
 const router = express.Router();
 
-// Import Controller
-const expenseController = require('../controllers/expenseController');
-const dashboardController = require('../controllers/dashboardController');
+const incomeController = require('../controllers/incomeController');
+const verifyToken = require('../middleware/authMiddleware');
 
-// 1. Endpoint dasar untuk testing
-router.get('/', (req, res) => {
-    res.json({ 
-        message: "Welcome to CuppyCash API!",
-        status: "Server is running smoothly"
-    });
-});
+// ==========================
+// CRUD INCOME + AUTH
+// ==========================
 
-// ==========================================
-// ROUTE UNTUK FITUR EXPENSE
-// ==========================================
-// Mengelompokkan semua route pengeluaran
-router.get('/expenses', expenseController.getAllExpenses);
-router.post('/expenses', expenseController.addExpense);
-router.delete('/expenses/:id', expenseController.deleteExpense);
+// CREATE
+router.post('/income', verifyToken, incomeController.addIncome);
 
-// ==========================================
-// ROUTE UNTUK FITUR DASHBOARD
-// ==========================================
-// Ambil ringkasan (Total Income, Total Expense, Balance) berdasarkan ID User
-router.get('/dashboard/summary/:id_user', dashboardController.getChartData);
+// READ
+router.get('/income', verifyToken, incomeController.getAllIncome);
+
+// UPDATE
+router.put('/income/:id', verifyToken, incomeController.updateIncome);
+
+// DELETE
+router.delete('/income/:id', verifyToken, incomeController.deleteIncome);
 
 module.exports = router;
