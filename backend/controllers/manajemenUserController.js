@@ -1,5 +1,6 @@
 const userModel = require('../models/manajemenUserModel');
 
+
 // GET PROFILE
 exports.getProfile = async (req, res) => {
   try {
@@ -15,7 +16,12 @@ exports.getProfile = async (req, res) => {
       });
     }
 
-    res.json(rows[0]);
+    res.json({
+      ...rows[0],
+      profile_picture: rows[0].profile_picture
+        ? `http://localhost:3000/uploads/${rows[0].profile_picture}`
+        : null
+    });
 
   } catch (error) {
     res.status(500).json({
@@ -25,7 +31,8 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// UPDATE PROFILE
+
+// UPDATE PROFILE + UPLOAD FOTO
 exports.updateProfile = async (req, res) => {
   try {
     if (!req.user) {
@@ -33,6 +40,13 @@ exports.updateProfile = async (req, res) => {
     }
 
     const { username, email, password } = req.body;
+
+    // ambil file dari multer
+    const profile_picture = req.file ? req.file.filename : null;
+
+    // DEBUG (boleh dihapus nanti)
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
 
     // VALIDASI
     if (!username || !email) {
@@ -56,7 +70,8 @@ exports.updateProfile = async (req, res) => {
     await userModel.updateUser(req.user.id_user, {
       username,
       email,
-      password
+      password,
+      profile_picture 
     });
 
     res.json({
@@ -66,32 +81,6 @@ exports.updateProfile = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Gagal update profil",
-      error: error.message
-    });
-  }
-};
-
-// UPLOAD FOTO PROFILE
-exports.getProfile = async (req, res) => {
-  try {
-    const [rows] = await userModel.getUserById(req.user.id_user);
-
-    if (rows.length === 0) {
-      return res.status(404).json({
-        message: "User tidak ditemukan"
-      });
-    }
-
-    res.json({
-      ...rows[0],
-      profile_picture: rows[0].profile_picture
-        ? `http://localhost:3000/uploads/${rows[0].profile_picture}`
-        : null
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      message: "Gagal mengambil profil",
       error: error.message
     });
   }
