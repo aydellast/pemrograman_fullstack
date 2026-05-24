@@ -1,6 +1,15 @@
 const db = require('../config/database');
 
 const expenseController = {
+<<<<<<< HEAD
+=======
+
+    // --- 1. FITUR READ ---
+    getAllExpenses: (req, res) => {
+        const id_user = req.user?.id || 1;
+
+        const query = "SELECT * FROM pengeluaran WHERE id_user = ?";
+>>>>>>> 575d41d (Save frontend progress before sync)
 
     // --- 1. FITUR READ ---
     getAllExpenses: (req, res) => {
@@ -51,7 +60,11 @@ ORDER BY t.transaction_date DESC
             }
 
             const query =
+<<<<<<< HEAD
                 "INSERT INTO transactions (id_user, id_category, amount, transaction_date, description, image_url) VALUES (?, ?, ?, ?, ?, ?)";
+=======
+                "INSERT INTO pengeluaran (id_user, id_category, amount, transaction_date, description, image_url) VALUES (?, ?, ?, ?, ?, ?)";
+>>>>>>> 575d41d (Save frontend progress before sync)
 
             db.query(
                 query,
@@ -74,7 +87,11 @@ ORDER BY t.transaction_date DESC
                     res.status(201).json({
                         message: "Pengeluaran berhasil dicatat! ✅",
                         data: {
+<<<<<<< HEAD
                             id_transaction: result.insertId,
+=======
+                            id_transaksi: result.insertId,
+>>>>>>> 575d41d (Save frontend progress before sync)
                             bukti: bukti_pengeluaran
                         }
                     });

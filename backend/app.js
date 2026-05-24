@@ -1,6 +1,12 @@
 const express = require('express');
-const app = express();
 const path = require('path');
+
+const app = express();
+
+// ==============================
+// DATABASE
+// ==============================
+
 const db = require('./config/database');
 
 // ==========================
@@ -111,6 +117,7 @@ app.get("/test-db", (req, res) => {
 // ERROR HANDLER
 // ==========================
 const errorHandler = require('./utils/errorHandler');
+
 app.use(errorHandler);
 
 // ==========================
