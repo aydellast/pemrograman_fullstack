@@ -4,6 +4,7 @@ import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Dashboard from "./pages/Dashboard/Dashboard";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import Profile from "./pages/Profile/Profile";
 import Budget from "./pages/Budget/Budget";
 import TransactionHistory from "./pages/History/TransactionHistory";
@@ -16,16 +17,36 @@ import Category from "./pages/Category/Category";
 import Income from "./pages/Income/Income";
 >>>>>>> 88fd08a (Selesai sprint 9)
 >>>>>>> 1628fc4 (Selesai sprint 9)
+=======
+
+import Expenses from "./pages/Expenses";
+import Category from "./pages/Category/Category";
+import Income from "./pages/Income/Income";
+
+import Profile from "./pages/Profile/Profile";
+import Budget from "./pages/Budget/Budget";
+>>>>>>> 1e4bdb4 (Up)
 
 function App() {
+
   return (
     <BrowserRouter>
+
       <Routes>
 
-        <Route path="/" element={<Dashboard />} />
+        {/* DASHBOARD */}
+        <Route
+          path="/"
+          element={<Dashboard />}
+        />
 
-        <Route path="/login" element={<Login />} />
+        {/* LOGIN */}
+        <Route
+          path="/login"
+          element={<Login />}
+        />
 
+<<<<<<< HEAD
         <Route path="/register" element={<Register />} />
 <<<<<<< HEAD
         <Route path="/profile" element={<Profile />} />
@@ -36,14 +57,51 @@ function App() {
 <<<<<<< HEAD
         <Route path="/expenses" element={<Expenses />} />
 =======
+=======
+        {/* REGISTER */}
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+>>>>>>> 1e4bdb4 (Up)
 
-        <Route path="/categories" element={<Category />} />
+        {/* EXPENSES */}
+        <Route
+          path="/expenses"
+          element={<Expenses />}
+        />
 
-        <Route path="/income" element={<Income />} />
+        {/* CATEGORY */}
+        <Route
+          path="/categories"
+          element={<Category />}
+        />
 
+        {/* INCOME */}
+        <Route
+          path="/income"
+          element={<Income />}
+        />
+
+        {/* PROFILE */}
+        <Route
+          path="/profile"
+          element={<Profile />}
+        />
+
+        {/* BUDGET */}
+        <Route
+          path="/budget"
+          element={<Budget />}
+        />
+
+<<<<<<< HEAD
 >>>>>>> 88fd08a (Selesai sprint 9)
 >>>>>>> 1628fc4 (Selesai sprint 9)
+=======
+>>>>>>> 1e4bdb4 (Up)
       </Routes>
+
     </BrowserRouter>
   );
 }
