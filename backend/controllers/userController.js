@@ -3,9 +3,6 @@ const jwt = require('jsonwebtoken');
 const UserModel = require('../models/UserModel');
 
 const userController = {
-    // ==========================================
-    // 1. FUNGSI REGISTER (Daftar Akun Baru)
-    // ==========================================
     register: async (req, res) => {
         const { username, email, password } = req.body;
 

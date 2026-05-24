@@ -1,9 +1,9 @@
-import "./Register.css";
+import styles from "./Register.module.css";
 
 function Register() {
   return (
-    <div className="register-container">
-      <form className="register-form">
+    <div className={styles.container}>
+      <form className={styles.form}>
         <h2>Register</h2>
 
         <input type="text" placeholder="Full Name" />

@@ -1,11 +1,11 @@
-import "./Navbar.css";
+import styles from "./Navbar.module.css";
 
 function Navbar() {
   return (
-    <nav className="navbar">
+    <nav className={styles.navbar}>
       <h2>CuppyCash</h2>
 
-      <ul className="nav-links">
+      <ul className={styles["nav-links"]}>
         <li>Dashboard</li>
         <li>Income</li>
         <li>Expense</li>
