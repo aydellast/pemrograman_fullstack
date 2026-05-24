@@ -1,146 +1,113 @@
-const express = require('express');
-const path = require('path');
-
+const express = require("express");
 const app = express();
+const port = 3000;
 
-// ==============================
+// ==========================
+// MIDDLEWARE
+// ==========================
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
+
+// ==========================
 // DATABASE
-// ==============================
-
+// ==========================
 const db = require('./config/database');
 
-
-// ==============================
-// ROUTES
-// ==============================
-
+// ==========================
+// ROUTES IMPORT
+// ==========================
 const apiRouter = require('./routes/apiRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const userRoutes = require('./routes/userRoutes');
+const expenseRoutes = require('./routes/expensesRoutes');
 const manajemenUserRoutes = require('./routes/manajemenUserRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
-const expenseRoutes = require('./routes/expensesRoutes');
 const historyRoutes = require('./routes/historyRoutes');
 const savingGoalRoutes = require('./routes/savingGoalRoutes');
 const incomeRoutes = require('./routes/incomeRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const chartRoutes = require('./routes/chartRoutes');
 
+// ==========================
+// DEBUG ROUTES TYPE
+// ==========================
+console.log("transactionRoutes:", typeof transactionRoutes);
+console.log("userRoutes:", typeof userRoutes);
+console.log("expenseRoutes:", typeof expenseRoutes);
+console.log("manajemenUserRoutes:", typeof manajemenUserRoutes);
+console.log("budgetRoutes:", typeof budgetRoutes);
+console.log("historyRoutes:", typeof historyRoutes);
+console.log("savingGoalRoutes:", typeof savingGoalRoutes);
+console.log("incomeRoutes:", typeof incomeRoutes);
+console.log("categoryRoutes:", typeof categoryRoutes);
+console.log("chartRoutes:", typeof chartRoutes);
 
-// ==============================
-// MIDDLEWARE
-// ==============================
+// ==========================
+// ROUTES REGISTER (CLEAN VERSION)
+// ==========================
 
-app.use(express.json());
-
-app.use(express.urlencoded({
-    extended: true
-}));
-
-// akses folder uploads
-app.use(
-    '/uploads',
-    express.static(path.join(__dirname, 'uploads'))
-);
-
-
-// ==============================
-// MAIN ROUTES
-// ==============================
-
-// auth + dashboard + expense API utama
+// API base
 app.use('/api', apiRouter);
 
-// chart routes
-app.use('/api/charts', chartRoutes);
+// USERS
+app.use('/api/users', userRoutes);
 
-// transaction
-app.use('/transactions', transactionRoutes);
+// TRANSACTIONS
+app.use('/api/transactions', transactionRoutes);
 
-// user
-app.use('/users', userRoutes);
+// EXPENSES
+app.use('/api/expenses', expenseRoutes);
 
-// management user
-app.use('/api/users', manajemenUserRoutes);
+// ADMIN USER
+app.use('/api/manajemen-users', manajemenUserRoutes);
 
-// budgets
+// BUDGET
 app.use('/api/budgets', budgetRoutes);
 
-// history
+// HISTORY
 app.use('/api/history', historyRoutes);
 
-// saving goals
+// SAVING GOALS
 app.use('/api/saving-goals', savingGoalRoutes);
 
-// income
+// INCOME
 app.use('/api/income', incomeRoutes);
 
-// categories
+// CATEGORY
 app.use('/api/categories', categoryRoutes);
 
-// expenses
-app.use('/expenses', expenseRoutes);
+// CHARTS
+app.use('/api/charts', chartRoutes);
 
-
-// ==============================
-// ROOT
-// ==============================
-
-app.get('/', (req, res) => {
-    res.send(`
-        <h1>🚀 Selamat Datang di API CuppyCash!</h1>
-        <p>Server berjalan dengan lancar.</p>
-    `);
-});
-
-
-// ==============================
-// TEST DATABASE
-// ==============================
-
-app.get('/test-db', (req, res) => {
-
-    db.query(
-        'SELECT 1 + 1 AS solution',
-        (err, rows) => {
-
-            if (err) {
-                return res.status(500).json({
-                    message: "Koneksi database gagal ❌",
-                    error: err.message
-                });
-            }
-
+// ==========================
+// TEST DB
+// ==========================
+app.get("/test-db", (req, res) => {
+    db.query("SELECT 1 + 1 AS solution", (err, result) => {
+        if (err) {
+            res.status(500).json({
+                message: "Koneksi database gagal ❌",
+                error: err
+            });
+        } else {
             res.json({
                 message: "Koneksi database berhasil 100%! ✅",
-                result: rows
+                result
             });
         }
-    );
+    });
 });
 
-
-// ==============================
+// ==========================
 // ERROR HANDLER
-// ==============================
-
+// ==========================
 const errorHandler = require('./utils/errorHandler');
-
 app.use(errorHandler);
 
-
-// ==============================
-// SERVER
-// ==============================
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-
-    console.log(`
-🚀 CuppyCash Server running on:
-http://localhost:${PORT}
-    `);
-
-    console.log('✅ MySQL Connected');
+// ==========================
+// START SERVER
+// ==========================
+app.listen(port, () => {
+    console.log(`CuppyCash Server jalan di http://localhost:${port}`);
 });

@@ -1,43 +1,66 @@
-const { Sequelize, DataTypes } = require("sequelize");
-require("dotenv").config();
+const db = require('../config/database');
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASS,
-  {
-    host: process.env.DB_HOST,
-    dialect: "mysql",
-    logging: false,
-  }
-);
+const Category = {
 
-const Category = sequelize.define(
-  "Category",
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-  },
-  {
-    tableName: "categories",
-    timestamps: true,
-  }
-);
+    // CREATE CATEGORY
+    create: (data, callback) => {
 
-// sync database
-sequelize.sync()
-  .then(() => console.log("Category table ready"))
-  .catch((err) => console.error("DB Error:", err));
+        const sql = `
+            INSERT INTO categories (user_id, name)
+            VALUES (?, ?)
+        `;
+
+        db.query(sql, [data.user_id, data.name], callback);
+    },
+
+
+    // GET ALL CATEGORY
+    getAll: (callback) => {
+
+        const sql = `
+            SELECT * FROM categories
+        `;
+
+        db.query(sql, callback);
+    },
+
+
+    // GET CATEGORY BY ID
+    getById: (id, callback) => {
+
+        const sql = `
+            SELECT * FROM categories
+            WHERE id = ?
+        `;
+
+        db.query(sql, [id], callback);
+    },
+
+
+    // UPDATE CATEGORY
+    update: (id, data, callback) => {
+
+        const sql = `
+            UPDATE categories
+            SET name = ?
+            WHERE id = ?
+        `;
+
+        db.query(sql, [data.name, id], callback);
+    },
+
+
+    // DELETE CATEGORY
+    delete: (id, callback) => {
+
+        const sql = `
+            DELETE FROM categories
+            WHERE id = ?
+        `;
+
+        db.query(sql, [id], callback);
+    }
+
+};
 
 module.exports = Category;

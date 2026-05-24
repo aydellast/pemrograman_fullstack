@@ -1,61 +1,123 @@
-const Category = require("../models/categoryModel");;
+const Category = require('../models/categoryModel');
 
-exports.createCategory = async (req, res) => {
-  try {
-    const { name } = req.body;
 
-    const category = await Category.create({
-      user_id: req.user.id,
-      name,
+// CREATE CATEGORY
+exports.createCategory = (req, res) => {
+
+    const { user_id, name } = req.body;
+
+    if (!user_id || !name) {
+        return res.status(400).json({
+            message: "user_id dan name wajib diisi"
+        });
+    }
+
+    Category.create(req.body, (err, result) => {
+
+        if (err) {
+            return res.status(500).json({
+                message: "Server error",
+                error: err
+            });
+        }
+
+        res.status(201).json({
+            message: "Category berhasil dibuat",
+            data: result
+        });
+
     });
 
-    res.status(201).json({
-      message: "Kategori berhasil ditambahkan",
-      data: category,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 };
 
-exports.getCategories = async (req, res) => {
-  try {
-    const categories = await Category.findAll({
-      where: { user_id: req.user.id },
+
+// GET ALL CATEGORY
+exports.getAllCategory = (req, res) => {
+
+    Category.getAll((err, result) => {
+
+        if (err) {
+            return res.status(500).json({
+                message: "Server error",
+                error: err
+            });
+        }
+
+        res.status(200).json(result);
+
     });
 
-    res.json(categories);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 };
 
-exports.updateCategory = async (req, res) => {
-  try {
+
+// GET CATEGORY BY ID
+exports.getCategoryById = (req, res) => {
+
     const { id } = req.params;
-    const { name } = req.body;
 
-    await Category.update(
-      { name },
-      { where: { id, user_id: req.user.id } }
-    );
+    Category.getById(id, (err, result) => {
 
-    res.json({ message: "Kategori berhasil diupdate" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+        if (err) {
+            return res.status(500).json({
+                message: "Server error",
+                error: err
+            });
+        }
 
-exports.deleteCategory = async (req, res) => {
-  try {
-    const { id } = req.params;
+        if (result.length === 0) {
+            return res.status(404).json({
+                message: "Category tidak ditemukan"
+            });
+        }
 
-    await Category.destroy({
-      where: { id, user_id: req.user.id },
+        res.status(200).json(result[0]);
+
     });
 
-    res.json({ message: "Kategori berhasil dihapus" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+};
+
+
+// UPDATE CATEGORY
+exports.updateCategory = (req, res) => {
+
+    const { id } = req.params;
+
+    Category.update(id, req.body, (err, result) => {
+
+        if (err) {
+            return res.status(500).json({
+                message: "Server error",
+                error: err
+            });
+        }
+
+        res.status(200).json({
+            message: "Category berhasil diupdate"
+        });
+
+    });
+
+};
+
+
+// DELETE CATEGORY
+exports.deleteCategory = (req, res) => {
+
+    const { id } = req.params;
+
+    Category.delete(id, (err, result) => {
+
+        if (err) {
+            return res.status(500).json({
+                message: "Server error",
+                error: err
+            });
+        }
+
+        res.status(200).json({
+            message: "Category berhasil dihapus"
+        });
+
+    });
+
 };
