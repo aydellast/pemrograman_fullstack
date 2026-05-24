@@ -18,7 +18,6 @@
   cursor: pointer;
 }
 
-<<<<<<< HEAD:frontend/src/components/Navbar/Navbar.module.css
 @media screen and (max-width: 768px) {
   .navbar {
     flex-direction: column;
@@ -29,7 +28,7 @@
     flex-direction: column;
     align-items: center;
   }
-=======
+
 .nav-links a {
   text-decoration: none;
   color: white;
@@ -37,5 +36,6 @@
 
 .nav-links a:hover {
   color: #ddd;
->>>>>>> 88fd08a (Selesai sprint 9):frontend/src/components/Navbar/Navbar.css
+
+  }
 }
