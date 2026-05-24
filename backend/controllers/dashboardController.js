@@ -3,33 +3,32 @@ const db = require('../config/database');
 const dashboardController = { 
     getSummary: async (req, res) => { 
         try { 
-            // SPRINT 6: Langsung ambil ID dari Token (Meisha tidak perlu input ID manual lagi)
+            // SPRINT 6: ID diambil otomatis dari middleware verifyToken
             const id_user = req.user.id; 
  
-            // Query untuk menghitung total income dan expense secara otomatis
+            // Perbaikan Query: Menggunakan tabel 'pengeluaran'
+            // Kita hitung total_expense dari tabel pengeluaran milik user tersebut
             const query = ` 
                 SELECT  
-                    SUM(CASE WHEN c.type = 'Income' THEN t.amount ELSE 0 END) AS total_income, 
-                    SUM(CASE WHEN c.type = 'Expense' THEN t.amount ELSE 0 END) AS total_expense 
-                FROM transactions t 
-                JOIN categories c ON t.id_category = c.id_category 
-                WHERE t.id_user = ? 
+                    SUM(amount) AS total_expense 
+                FROM pengeluaran 
+                WHERE id_user = ? 
             `; 
  
             db.query(query, [id_user], (err, results) => { 
-                if (err) throw err; 
+                if (err) {
+                    return res.status(500).json({ message: "Gagal query ke database", error: err.message });
+                }
                  
-                // SPRINT 5: Validasi agar data null berubah jadi 0 (mencegah error di tampilan)
-                const income = results[0].total_income || 0; 
+                // SPRINT 5: Validasi agar data null berubah jadi 0
                 const expense = results[0].total_expense || 0; 
-                const balance = income - expense; 
  
                 res.status(200).json({ 
                     message: "Data ringkasan dashboard berhasil ditarik 📊", 
                     data: { 
-                        total_income: income, 
+                        total_income: 0, // Sementara 0 jika kamu belum membuat tabel pemasukan
                         total_expense: expense, 
-                        balance: balance 
+                        balance: 0 - expense 
                     } 
                 }); 
             }); 
