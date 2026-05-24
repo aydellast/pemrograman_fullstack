@@ -7,16 +7,13 @@ const userController = {
     // 1. FUNGSI REGISTER (Daftar Akun Baru)
     // ==========================================
     register: async (req, res) => {
-        // Menangkap data yang dikirim user dari Postman/Frontend
         const { username, email, password } = req.body;
 
-        // Validasi: Cek apakah ada kolom yang dibiarkan kosong
         if (!username || !email || !password) {
             return res.status(400).json({ message: "Semua kolom (username, email, password) wajib diisi!" });
         }
 
         try {
-            // Cek apakah email sudah pernah didaftarkan sebelumnya
             UserModel.findByEmail(email, async (err, existingUser) => {
                 if (err) return res.status(500).json({ message: "Error pada server", error: err });
                 
@@ -24,18 +21,15 @@ const userController = {
                     return res.status(400).json({ message: "Email sudah terdaftar, silakan gunakan email lain atau langsung login." });
                 }
 
-                // Proses Hashing: Mengacak password asli menjadi karakter rahasia
                 const saltRounds = 10;
                 const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-                // Menyiapkan data untuk dikirim ke UserModel (Database)
                 const userData = {
                     username: username,
                     email: email,
-                    password: hashedPassword // Yang disimpan adalah password acak, BUKAN password asli
+                    password: hashedPassword 
                 };
 
-                // Menyimpan ke database
                 UserModel.create(userData, (err, result) => {
                     if (err) return res.status(500).json({ message: "Gagal menyimpan data user", error: err });
                     
@@ -57,27 +51,21 @@ const userController = {
             return res.status(400).json({ message: "Email dan password wajib diisi!" });
         }
 
-        // Cari data user di database berdasarkan email yang diketik
         UserModel.findByEmail(email, async (err, user) => {
             if (err) return res.status(500).json({ message: "Error pada server", error: err });
             
-            // Jika email tidak ditemukan di database
             if (!user) {
                 return res.status(404).json({ message: "Akun tidak ditemukan. Silakan register terlebih dahulu!" });
             }
 
-            // Proses Pencocokan: Bandingkan password ketikan user dengan password acak di database
             const isPasswordMatch = await bcrypt.compare(password, user.password);
             
             if (!isPasswordMatch) {
                 return res.status(401).json({ message: "Password salah! Coba lagi." });
             }
 
-            // Jika cocok, buatkan Karcis Akses (Token JWT)
-            // Token ini yang akan dipakai user untuk masuk ke fitur-fitur lain (seperti tambah transaksi)
             const secretKey = process.env.JWT_SECRET || 'rahasia_cuppycash_super_aman'; 
             
-            // Token berlaku selama 24 jam
             const token = jwt.sign({ id_user: user.id_user, email: user.email }, secretKey, { expiresIn: '24h' });
 
             res.status(200).json({
@@ -85,6 +73,31 @@ const userController = {
                 token: token
             });
         });
+    },
+
+    // ==========================================
+    // 3. FUNGSI UPLOAD FOTO PROFIL (BARU DITAMBAHKAN)
+    // ==========================================
+    uploadProfile: async (req, res) => {
+        try {
+            // 1. Cek apakah ada file yang berhasil diangkut oleh Multer
+            if (!req.file) {
+                return res.status(400).json({ message: "Tidak ada gambar yang diupload! ❌" });
+            }
+
+            // 2. Ambil nama file-nya (contoh: 171464738291.jpg)
+            const namaFile = req.file.filename;
+
+            // 3. Kasih response sukses ke Postman
+            res.status(200).json({
+                message: "Hore! Foto profil berhasil diupload! ✅",
+                file_name: namaFile,
+                url: `http://localhost:3000/uploads/${namaFile}`
+            });
+
+        } catch (error) {
+            res.status(500).json({ message: "Waduh, servernya error ❌", error: error.message });
+        }
     }
 };
 
