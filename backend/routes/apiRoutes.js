@@ -1,47 +1,86 @@
 const express = require('express');
 const router = express.Router();
-<<<<<<< HEAD
-=======
 
-// Import Controller & Routes
+// Controllers
 const expenseController = require('../controllers/expenseController');
->>>>>>> 2c9597a0d2bb21ba0f63d72994ea04de6c1e20e8
 const dashboardController = require('../controllers/dashboardController');
 const authController = require('../controllers/authController');
-const verifyToken = require('../middleware/authMiddleware'); 
 
-<<<<<<< HEAD
+// Middleware
+const verifyToken = require('../middleware/authMiddleware');
 
-// Route untuk login 
-router.post('/login', authController.login); 
-
-// Sekarang baris ini tidak akan eror lagi karena verifyToken sudah didefinisikan
-router.get('/dashboard/summary/:id_user', verifyToken, dashboardController.getSummary);
-=======
-// Import file routes yang dipisah
+// Routes terpisah
 const chartRoutes = require('./chartRoutes');
-const manajemenUserRoutes = require('./manajemenUserRoutes'); 
+const manajemenUserRoutes = require('./manajemenUserRoutes');
 
-// Endpoint dasar untuk testing
+
+// ==============================
+// ROOT TEST API
+// ==============================
+
 router.get('/', (req, res) => {
-    res.json({ 
+    res.json({
         message: "Welcome to CuppyCash API!",
         status: "Server is running smoothly"
     });
 });
 
 
+// ==============================
+// AUTH ROUTES
+// ==============================
+
+router.post('/login', authController.login);
+
+
+// ==============================
+// DASHBOARD ROUTES
+// ==============================
+
+router.get(
+    '/dashboard/summary/:id_user',
+    verifyToken,
+    dashboardController.getSummary
+);
+
+router.get(
+    '/dashboard/chart/:id_user',
+    dashboardController.getChartData
+);
+
+
+// ==============================
+// EXPENSE ROUTES
+// ==============================
+
+router.get(
+    '/expenses',
+    expenseController.getAllExpenses
+);
+
+router.post(
+    '/expenses',
+    expenseController.addExpense
+);
+
+router.delete(
+    '/expenses/:id',
+    expenseController.deleteExpense
+);
+
+
+// ==============================
+// USER ROUTES
+// ==============================
+
 router.use('/users', manajemenUserRoutes);
 
 
-router.get('/expenses', expenseController.getAllExpenses);
-router.post('/expenses', expenseController.addExpense);
-router.delete('/expenses/:id', expenseController.deleteExpense);
-
-
-router.get('/dashboard/summary/:id_user', dashboardController.getChartData);
->>>>>>> 2c9597a0d2bb21ba0f63d72994ea04de6c1e20e8
+// ==============================
+// CHART ROUTES
+// ==============================
 
 router.use('/charts', chartRoutes);
+
 
 module.exports = router;
