@@ -1,9 +1,9 @@
-import "./Login.css";
+import styles from "./Login.module.css";
 
 function Login() {
   return (
-    <div className="login-container">
-      <form className="login-form">
+    <div className={styles.container}>
+      <form className={styles.form}>
         <h2>Login</h2>
 
         <input type="email" placeholder="Email" />

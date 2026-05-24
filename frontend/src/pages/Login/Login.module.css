@@ -1,4 +1,4 @@
-.login-container {
+.container {
   height: 100vh;
 
   display: flex;
@@ -8,7 +8,7 @@
   background-color: #f3f4f6;
 }
 
-.login-form {
+.form {
   background: white;
   padding: 30px;
   width: 300px;
