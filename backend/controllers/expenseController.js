@@ -8,6 +8,7 @@ const expenseController = {
     getAllExpenses: (req, res) => {
         const id_user = req.user?.id || 1;
 
+<<<<<<< HEAD
         const query = "SELECT * FROM pengeluaran WHERE id_user = ?";
 >>>>>>> 575d41d (Save frontend progress before sync)
 
@@ -15,6 +16,8 @@ const expenseController = {
     getAllExpenses: (req, res) => {
         const id_user = req.user?.id || 1;
 
+=======
+>>>>>>> 497e7fe (Fix backend routes, dashboard, chart, income and expense API)
 const query=`
 SELECT
 t.*,
@@ -61,10 +64,14 @@ ORDER BY t.transaction_date DESC
 
             const query =
 <<<<<<< HEAD
+<<<<<<< HEAD
                 "INSERT INTO transactions (id_user, id_category, amount, transaction_date, description, image_url) VALUES (?, ?, ?, ?, ?, ?)";
 =======
                 "INSERT INTO pengeluaran (id_user, id_category, amount, transaction_date, description, image_url) VALUES (?, ?, ?, ?, ?, ?)";
 >>>>>>> 575d41d (Save frontend progress before sync)
+=======
+                "INSERT INTO transactions (id_user, id_category, amount, transaction_date, description, image_url) VALUES (?, ?, ?, ?, ?, ?)";
+>>>>>>> 497e7fe (Fix backend routes, dashboard, chart, income and expense API)
 
             db.query(
                 query,
@@ -88,10 +95,14 @@ ORDER BY t.transaction_date DESC
                         message: "Pengeluaran berhasil dicatat! ✅",
                         data: {
 <<<<<<< HEAD
+<<<<<<< HEAD
                             id_transaction: result.insertId,
 =======
                             id_transaksi: result.insertId,
 >>>>>>> 575d41d (Save frontend progress before sync)
+=======
+                            id_transaction: result.insertId,
+>>>>>>> 497e7fe (Fix backend routes, dashboard, chart, income and expense API)
                             bukti: bukti_pengeluaran
                         }
                     });
