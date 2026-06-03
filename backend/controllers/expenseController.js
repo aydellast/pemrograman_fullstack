@@ -6,8 +6,17 @@ const expenseController = {
     getAllExpenses: (req, res) => {
         const id_user = req.user?.id || 1;
 
-        const query = "SELECT * FROM pengeluaran WHERE id_user = ?";
-
+const query=`
+SELECT
+t.*,
+c.name AS category_name
+FROM transactions t
+JOIN categories c
+ON t.id_category=c.id_category
+WHERE t.id_user=?
+AND c.type='Expense'
+ORDER BY t.transaction_date DESC
+`;
         db.query(query, [id_user], (err, results) => {
             if (err) {
                 return res.status(500).json({
@@ -42,7 +51,7 @@ const expenseController = {
             }
 
             const query =
-                "INSERT INTO pengeluaran (id_user, id_category, amount, transaction_date, description, image_url) VALUES (?, ?, ?, ?, ?, ?)";
+                "INSERT INTO transactions (id_user, id_category, amount, transaction_date, description, image_url) VALUES (?, ?, ?, ?, ?, ?)";
 
             db.query(
                 query,
@@ -65,7 +74,7 @@ const expenseController = {
                     res.status(201).json({
                         message: "Pengeluaran berhasil dicatat! ✅",
                         data: {
-                            id_transaksi: result.insertId,
+                            id_transaction: result.insertId,
                             bukti: bukti_pengeluaran
                         }
                     });
@@ -85,7 +94,7 @@ const expenseController = {
         const { id } = req.params;
 
         const query =
-            "DELETE FROM pengeluaran WHERE id_pengeluaran = ?";
+            "DELETE FROM transactions WHERE id_transaction = ?";
 
         db.query(query, [id], (err, result) => {
             if (err) {

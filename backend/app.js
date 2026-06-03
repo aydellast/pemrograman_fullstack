@@ -28,6 +28,7 @@ const savingGoalRoutes = require('./routes/savingGoalRoutes');
 const incomeRoutes = require('./routes/incomeRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const chartRoutes = require('./routes/chartRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 // ==========================
 // DEBUG ROUTES TYPE
@@ -79,6 +80,12 @@ app.use('/api/categories', categoryRoutes);
 
 // CHARTS
 app.use('/api/charts', chartRoutes);
+
+app.use('/api/dashboard', dashboardRoutes);
+
+app.get("/", (req, res) => {
+    res.send("🚀 CuppyCash Backend API Running Successfully!");
+});
 
 // ==========================
 // TEST DB

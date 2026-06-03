@@ -6,7 +6,7 @@ const authController = {
             const { email, password } = req.body;
 
             // mengecek email & password ke database
-            if (email === "meisha@example.com" && password === "password123") {
+            if (email === "admin@example.com" && password === "password123") {
                 const token = jwt.sign({ id: 1, email: email }, 'RAHASIA_TOKEN', { expiresIn: '1h' });
                 return res.status(200).json({
                     message: "Login berhasil! 🔑",
