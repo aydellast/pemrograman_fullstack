@@ -19,11 +19,11 @@
   gap: 15px;
 }
 
-.login-form input {
+.form input {
   padding: 10px;
 }
 
-.login-form button {
+.form button {
   padding: 10px;
   background-color: #4f46e5;
   color: white;
