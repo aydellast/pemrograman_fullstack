@@ -6,12 +6,14 @@ exports.getSummary = (req, res) => {
         const id_user = req.user.id_user;
 
         const query = `
-            SELECT 
-                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS total_income,
-                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS total_expense
-            FROM transactions
-            WHERE id_user = ?
-        `;
+SELECT
+    SUM(CASE WHEN c.type='Income' THEN t.amount ELSE 0 END) AS total_income,
+    SUM(CASE WHEN c.type='Expense' THEN t.amount ELSE 0 END) AS total_expense
+FROM transactions t
+JOIN categories c
+ON t.id_category = c.id_category
+WHERE t.id_user = ?
+`;
 
         db.query(query, [id_user], (err, result) => {
             if (err) {

@@ -1,80 +1,112 @@
-const Expense = require('../models/expenseModel');
+const db = require('../config/database');
 
 const expenseController = {
+
+    // --- 1. FITUR READ ---
     getAllExpenses: (req, res) => {
-        // Menggunakan JOIN agar bisa menampilkan Nama Kategori, bukan sekadar ID
-        const query = `
-            SELECT t.*, c.name AS category_name 
-            FROM transactions t
-            JOIN categories c ON t.id_category = c.id_category
-            WHERE c.type = 'Expense' 
-            ORDER BY t.transaction_date DESC`;
+        const id_user = req.user?.id || 1;
 
-        db.query(query, (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: "Daftar pengeluaran berhasil diambil", data: results });
+const query=`
+SELECT
+t.*,
+c.name AS category_name
+FROM transactions t
+JOIN categories c
+ON t.id_category=c.id_category
+WHERE t.id_user=?
+AND c.type='Expense'
+ORDER BY t.transaction_date DESC
+`;
+        db.query(query, [id_user], (err, results) => {
+            if (err) {
+                return res.status(500).json({
+                    message: "Gagal mengambil data",
+                    error: err.message
+                });
+            }
+
+            res.status(200).json(results);
         });
     },
 
-    // 2. Menambah pengeluaran baru
-    addExpense: (req, res) => {
-        const data = req.body;
-        
-        // Memanggil fungsi create di expenseModel.js
-        Expense.create(data, (err, result) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.status(201).json({ 
-                message: "Pengeluaran berhasil dicatat! ✅", 
-                id: result.insertId 
+    // --- 2. FITUR CREATE ---
+    addExpense: async (req, res) => {
+        try {
+            const {
+                id_category,
+                amount,
+                transaction_date,
+                description
+            } = req.body;
+
+            const id_user = req.user?.id || 1;
+
+            const bukti_pengeluaran =
+                req.file ? req.file.filename : null;
+
+            if (!amount || amount <= 0) {
+                return res.status(400).json({
+                    message: "Jumlah pengeluaran tidak valid!"
+                });
+            }
+
+            const query =
+                "INSERT INTO transactions (id_user, id_category, amount, transaction_date, description, image_url) VALUES (?, ?, ?, ?, ?, ?)";
+
+            db.query(
+                query,
+                [
+                    id_user,
+                    id_category,
+                    amount,
+                    transaction_date,
+                    description,
+                    bukti_pengeluaran
+                ],
+                (err, result) => {
+                    if (err) {
+                        return res.status(500).json({
+                            message: "Gagal menyimpan ke database",
+                            error: err.message
+                        });
+                    }
+
+                    res.status(201).json({
+                        message: "Pengeluaran berhasil dicatat! ✅",
+                        data: {
+                            id_transaction: result.insertId,
+                            bukti: bukti_pengeluaran
+                        }
+                    });
+                }
+            );
+
+        } catch (error) {
+            res.status(500).json({
+                message: "Gagal memproses pengeluaran",
+                error: error.message
             });
-        });
+        }
     },
 
-    // 3. Menghapus pengeluaran berdasarkan ID
+    // --- 3. FITUR DELETE ---
     deleteExpense: (req, res) => {
         const { id } = req.params;
-        
-        // Kita langsung jalankan query delete di sini atau bisa tambahkan ke Model nanti
-        // Untuk sekarang, agar sejalan dengan Controller lama kamu:
-        const db = require('../config/database'); 
-        const query = "DELETE FROM transactions WHERE id_transaction = ?";
-        
+
+        const query =
+            "DELETE FROM transactions WHERE id_transaction = ?";
+
         db.query(query, [id], (err, result) => {
-            if (err) return res.status(500).json({ error: err.message });
-            if (result.affectedRows === 0) return res.status(404).json({ message: "Data tidak ditemukan" });
-            res.json({ message: "Pengeluaran berhasil dihapus" });
-        });
-    }
-};
+            if (err) {
+                return res.status(500).json({
+                    message: "Gagal menghapus pengeluaran",
+                    error: err.message
+                });
+            }
 
-const db = require('../config/database');
-const dashboardController = {
-
-    // 2. Menambah pengeluaran baru
-    addExpense: (req, res) => {
-        const { id_user, id_category, amount, transaction_date, description } = req.body;
-        
-        // Kolom 'type' tidak ada di tabel transactions, tipe ditentukan di tabel categories
-        const query = "INSERT INTO transactions (id_user, id_category, amount, transaction_date, description) VALUES (?, ?, ?, ?, ?)";
-        
-        db.query(query, [id_user, id_category, amount, transaction_date, description], (err, result) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.status(201).json({ 
-                message: "Pengeluaran berhasil dicatat!", 
-                id: result.insertId 
+            res.status(200).json({
+                message: "Pengeluaran berhasil dihapus!"
             });
-        });
-    },
-
-    // 3. Menghapus pengeluaran berdasarkan ID
-    deleteExpense: (req, res) => {
-        const { id } = req.params;
-        const query = "DELETE FROM transactions WHERE id_transaction = ?";
-        
-        db.query(query, [id], (err, result) => {
-            if (err) return res.status(500).json({ error: err.message });
-            if (result.affectedRows === 0) return res.status(404).json({ message: "Data tidak ditemukan" });
-            res.json({ message: "Pengeluaran berhasil dihapus" });
         });
     }
 };
