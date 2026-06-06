@@ -1,0 +1,75 @@
+body {
+  background-color: #f4f7fb;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.budget-page {
+  padding: 40px;
+}
+
+.budget-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.budget-header h1 {
+  font-size: 40px;
+  color: #4f46e5;
+  margin-bottom: 10px;
+}
+
+.budget-header p {
+  color: #666;
+}
+
+.budget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+  gap: 25px;
+}
+
+.budget-card {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+.budget-card:hover {
+  transform: translateY(-8px);
+}
+
+.budget-icon {
+  font-size: 50px;
+  margin-bottom: 15px;
+}
+
+.budget-card h2 {
+  color: #4f46e5;
+  margin-bottom: 10px;
+}
+
+.budget-card p {
+  color: #777;
+}
+
+.budget-card h3 {
+  margin: 15px 0;
+  color: #111827;
+}
+
+.budget-card button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #4f46e5;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.budget-card button:hover {
+  background: #4338ca;
+}

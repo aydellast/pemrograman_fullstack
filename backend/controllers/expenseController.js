@@ -6,17 +6,17 @@ const expenseController = {
     getAllExpenses: (req, res) => {
         const id_user = req.user?.id || 1;
 
-const query=`
-SELECT
-t.*,
-c.name AS category_name
-FROM transactions t
-JOIN categories c
-ON t.id_category=c.id_category
-WHERE t.id_user=?
-AND c.type='Expense'
-ORDER BY t.transaction_date DESC
-`;
+        const query = `
+            SELECT 
+                t.*, 
+                c.name AS category_name 
+            FROM transactions t
+            JOIN categories c ON t.id_category = c.id_category
+            WHERE t.id_user = ? 
+              AND c.type = 'Expense'
+            ORDER BY t.transaction_date DESC
+        `;
+
         db.query(query, [id_user], (err, results) => {
             if (err) {
                 return res.status(500).json({
@@ -24,7 +24,6 @@ ORDER BY t.transaction_date DESC
                     error: err.message
                 });
             }
-
             res.status(200).json(results);
         });
     },
@@ -40,9 +39,7 @@ ORDER BY t.transaction_date DESC
             } = req.body;
 
             const id_user = req.user?.id || 1;
-
-            const bukti_pengeluaran =
-                req.file ? req.file.filename : null;
+            const bukti_pengeluaran = req.file ? req.file.filename : null;
 
             if (!amount || amount <= 0) {
                 return res.status(400).json({
@@ -50,8 +47,7 @@ ORDER BY t.transaction_date DESC
                 });
             }
 
-            const query =
-                "INSERT INTO transactions (id_user, id_category, amount, transaction_date, description, image_url) VALUES (?, ?, ?, ?, ?, ?)";
+            const query = "INSERT INTO transactions (id_user, id_category, amount, transaction_date, description, image_url) VALUES (?, ?, ?, ?, ?, ?)";
 
             db.query(
                 query,
@@ -93,8 +89,7 @@ ORDER BY t.transaction_date DESC
     deleteExpense: (req, res) => {
         const { id } = req.params;
 
-        const query =
-            "DELETE FROM transactions WHERE id_transaction = ?";
+        const query = "DELETE FROM transactions WHERE id_transaction = ?";
 
         db.query(query, [id], (err, result) => {
             if (err) {

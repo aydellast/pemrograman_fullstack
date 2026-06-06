@@ -1,19 +1,22 @@
-const express = require("express");
+const express = require('express');
+const cors = require('cors'); 
+const path = require('path');
+
 const app = express();
-const port = 3000;
+const port = 5000; 
+
+// ==============================
+// DATABASE
+// ==============================
+const db = require('./config/database'); 
 
 // ==========================
 // MIDDLEWARE
 // ==========================
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static('uploads'));
-
-// ==========================
-// DATABASE
-// ==========================
-const db = require('./config/database');
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); 
 // ==========================
 // ROUTES IMPORT
 // ==========================
@@ -81,6 +84,7 @@ app.use('/api/categories', categoryRoutes);
 // CHARTS
 app.use('/api/charts', chartRoutes);
 
+// DASHBOARD
 app.use('/api/dashboard', dashboardRoutes);
 
 app.get("/", (req, res) => {
@@ -107,10 +111,14 @@ app.get("/test-db", (req, res) => {
 });
 
 // ==========================
-// ERROR HANDLER
+// ERROR HANDLER (Gunakan jika file errorHandler.js memang ada)
 // ==========================
-const errorHandler = require('./utils/errorHandler');
-app.use(errorHandler);
+try {
+    const errorHandler = require('./utils/errorHandler');
+    app.use(errorHandler);
+} catch (e) {
+    console.log("Info: utils/errorHandler.js tidak ditemukan, menggunakan default express handler.");
+}
 
 // ==========================
 // START SERVER
@@ -118,3 +126,5 @@ app.use(errorHandler);
 app.listen(port, () => {
     console.log(`CuppyCash Server jalan di http://localhost:${port}`);
 });
+
+module.exports = app;
