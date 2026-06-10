@@ -3,11 +3,7 @@ const router = express.Router();
 
 const authController = require('../controllers/authController');
 
-// ROOT API
-router.get('/', (req, res) => {
-    res.json({
-        message: "Welcome to CuppyCash API 🚀"
-    });
-});
+router.post('/login', authController.login);
+router.post('/register', authController.register);
 
 module.exports = router;

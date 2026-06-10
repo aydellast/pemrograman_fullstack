@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const port = 3000;
+const cors = require("cors");
 
 // ==========================
 // MIDDLEWARE
@@ -8,18 +9,22 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
-// ==========================
 // DATABASE
-// ==========================
 const db = require('./config/database');
 
 // ==========================
 // ROUTES IMPORT
 // ==========================
 const apiRouter = require('./routes/apiRoutes');
+const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
-const userRoutes = require('./routes/userRoutes');
 const expenseRoutes = require('./routes/expensesRoutes');
 const manajemenUserRoutes = require('./routes/manajemenUserRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
@@ -33,8 +38,8 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 // ==========================
 // DEBUG ROUTES TYPE
 // ==========================
+console.log("authRoutes:", typeof authRoutes);
 console.log("transactionRoutes:", typeof transactionRoutes);
-console.log("userRoutes:", typeof userRoutes);
 console.log("expenseRoutes:", typeof expenseRoutes);
 console.log("manajemenUserRoutes:", typeof manajemenUserRoutes);
 console.log("budgetRoutes:", typeof budgetRoutes);
@@ -43,7 +48,7 @@ console.log("savingGoalRoutes:", typeof savingGoalRoutes);
 console.log("incomeRoutes:", typeof incomeRoutes);
 console.log("categoryRoutes:", typeof categoryRoutes);
 console.log("chartRoutes:", typeof chartRoutes);
-
+console.log("dashboardRoutes:", typeof dashboardRoutes);
 // ==========================
 // ROUTES REGISTER (CLEAN VERSION)
 // ==========================
@@ -51,8 +56,8 @@ console.log("chartRoutes:", typeof chartRoutes);
 // API base
 app.use('/api', apiRouter);
 
-// USERS
-app.use('/api/users', userRoutes);
+// AUTH
+app.use('/api/auth', authRoutes);
 
 // TRANSACTIONS
 app.use('/api/transactions', transactionRoutes);
