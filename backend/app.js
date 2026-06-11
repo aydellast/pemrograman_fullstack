@@ -54,7 +54,6 @@ console.log("dashboardRoutes:", typeof dashboardRoutes);
 // ==========================
 
 // API base
-app.use('/api', apiRouter);
 
 // AUTH
 app.use('/api/auth', authRoutes);

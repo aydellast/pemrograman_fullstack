@@ -92,7 +92,7 @@ const authController = {
         }
 
         const user = results[0];
-
+        
         let isPasswordValid = false;
 
         if (user.password && user.password.startsWith('$2b$')) {
@@ -100,6 +100,20 @@ const authController = {
         } else {
           isPasswordValid = user.password === password;
         }
+
+        console.log("USER DB:", user.email);
+console.log("INPUT PASSWORD:", password);
+console.log("DB PASSWORD:", user.password);
+
+if (user.password && user.password.startsWith('$2b$')) {
+  console.log("MODE: BCRYPT");
+  isPasswordValid = await bcrypt.compare(password, user.password);
+} else {
+  console.log("MODE: PLAINTEXT");
+  isPasswordValid = user.password === password;
+}
+
+console.log("VALID?", isPasswordValid);
 
         if (!isPasswordValid) {
           return res.status(401).json({

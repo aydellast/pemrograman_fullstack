@@ -5,7 +5,6 @@ import Chart from "../../components/Chart/Chart";
 function ChartsPage() {
   return (
     <>
-      <Navbar />
 
       <div
         style={{
@@ -15,8 +14,6 @@ function ChartsPage() {
       >
         <Chart />
       </div>
-
-      <Footer />
     </>
   );
 }

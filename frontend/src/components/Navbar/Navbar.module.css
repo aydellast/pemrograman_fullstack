@@ -38,4 +38,17 @@
   color: #ddd;
 
   }
+
+.logoutBtn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.logoutBtn:hover {
+  background-color: #dc2626;
+}
 }

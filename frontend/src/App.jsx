@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import Layout from "./Layout/Layout";
+
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Dashboard from "./pages/Dashboard/Dashboard";
@@ -16,6 +18,7 @@ import Budget from "./pages/Budget/Budget";
 function App() {
   return (
     <BrowserRouter>
+      <Layout>
       <Routes>
 
         <Route path="/" element={<Dashboard />} />
@@ -37,6 +40,7 @@ function App() {
         <Route path="/budget" element={<Budget />} />
 
       </Routes>
+      </Layout>
     </BrowserRouter>
   );
 }
