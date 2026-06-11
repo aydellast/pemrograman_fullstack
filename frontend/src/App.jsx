@@ -15,31 +15,35 @@ import Income from "./pages/Income/Income";
 import Profile from "./pages/Profile/Profile";
 import Budget from "./pages/Budget/Budget";
 
+import TransactionHistory from "./pages/History/TransactionHistory";
+import SavingGoals from "./pages/Saving/SavingGoals";
 function App() {
   return (
     <BrowserRouter>
       <Layout>
-      <Routes>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
 
-        <Route path="/" element={<Dashboard />} />
+          <Route path="/login" element={<Login />} />
 
-        <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        <Route path="/register" element={<Register />} />
+          <Route path="/expenses" element={<Expenses />} />
 
-        <Route path="/expenses" element={<Expenses />} />
+          <Route path="/charts" element={<ChartsPage />} />
 
-        <Route path="/charts" element={<ChartsPage />} />
+          <Route path="/categories" element={<Category />} />
 
-        <Route path="/categories" element={<Category />} />
+          <Route path="/income" element={<Income />} />
 
-        <Route path="/income" element={<Income />} />
+          <Route path="/profile" element={<Profile />} />
 
-        <Route path="/profile" element={<Profile />} />
+          <Route path="/budget" element={<Budget />} />
 
-        <Route path="/budget" element={<Budget />} />
+          <Route path="/history" element={<TransactionHistory />} />
 
-      </Routes>
+          <Route path="/saving-goals" element={<SavingGoals />} />
+        </Routes>
       </Layout>
     </BrowserRouter>
   );
