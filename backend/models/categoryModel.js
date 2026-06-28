@@ -30,7 +30,7 @@ const Category = {
 
         const sql = `
             SELECT * FROM categories
-            WHERE id = ?
+            WHERE id_category = ?
         `;
 
         db.query(sql, [id], callback);
@@ -43,7 +43,7 @@ const Category = {
         const sql = `
             UPDATE categories
             SET name = ?
-            WHERE id = ?
+            WHERE id_category = ?
         `;
 
         db.query(sql, [data.name, id], callback);
@@ -55,7 +55,7 @@ const Category = {
 
         const sql = `
             DELETE FROM categories
-            WHERE id = ?
+            WHERE id_category = ?
         `;
 
         db.query(sql, [id], callback);

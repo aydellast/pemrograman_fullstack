@@ -1,102 +1,257 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import api from "../../services/api";
 
 function Income() {
-  const [income, setIncome] = useState([
-    { id: 1, amount: 500000, description: "Gaji Bulanan" },
-    { id: 2, amount: 200000, description: "Freelance" },
-  ]);
 
-  const [amount, setAmount] = useState("");
-  const [description, setDescription] = useState("");
+const [income,setIncome]=useState([]);
 
-  const addIncome = () => {
-    if (!amount || !description) return;
+const [amount,setAmount]=useState("");
 
-    setIncome([
-      ...income,
-      {
-        id: Date.now(),
-        amount,
-        description,
-      },
-    ]);
+const [description,setDescription]=useState("");
 
-    setAmount("");
-    setDescription("");
-  };
+const [editId,setEditId]=useState(null);
 
-  return (
-    <div style={styles.container}>
-      <h2>💰 Income Page</h2>
+useEffect(()=>{
 
-      <div style={styles.form}>
-        <input
-          style={styles.input}
-          type="number"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
+getIncome();
 
-        <input
-          style={styles.input}
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
+},[]);
 
-        <button style={styles.btn} onClick={addIncome}>
-          Tambah
-        </button>
-      </div>
 
-      <div style={styles.list}>
-        {income.map((item) => (
-          <div key={item.id} style={styles.card}>
-            <span>Rp {item.amount}</span>
-            <span>{item.description}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+const getIncome = async()=>{
+
+try{
+
+const token=localStorage.getItem("token");
+
+const response=await api.get(
+"/income",
+{
+headers:{
+Authorization:`Bearer ${token}`
+}
+}
+);
+
+setIncome(response.data);
+
+}catch(error){
+
+console.log(error);
+
 }
 
-const styles = {
-  container: {
-    padding: "20px",
-    maxWidth: "500px",
-    margin: "auto",
-    fontFamily: "Arial",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-    marginBottom: "20px",
-  },
-  input: {
-    padding: "10px",
-  },
-  btn: {
-    padding: "10px",
-    background: "blue",
-    color: "white",
-    border: "none",
-    cursor: "pointer",
-  },
-  list: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-  },
-  card: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "10px",
-    background: "#e6f0ff",
-    borderRadius: "6px",
-  },
 };
+
+
+const addIncome=async()=>{
+
+try{
+
+const token=localStorage.getItem("token");
+
+await api.post(
+
+"/income",
+
+{
+amount,
+description,
+id_category:1
+},
+
+{
+headers:{
+Authorization:`Bearer ${token}`
+}
+}
+
+);
+
+setAmount("");
+
+setDescription("");
+
+getIncome();
+
+}catch(error){
+
+console.log(error);
+
+}
+
+};
+
+
+const updateIncome=async()=>{
+
+try{
+
+const token=localStorage.getItem("token");
+
+await api.put(
+
+`/income/${editId}`,
+
+{
+amount,
+description,
+id_category:1
+},
+
+{
+headers:{
+Authorization:`Bearer ${token}`
+}
+}
+
+);
+
+setEditId(null);
+
+setAmount("");
+
+setDescription("");
+
+getIncome();
+
+}catch(error){
+
+console.log(error);
+
+}
+
+};
+
+
+const deleteIncome=async(id)=>{
+
+try{
+
+const token=localStorage.getItem("token");
+
+await api.delete(
+
+`/income/${id}`,
+
+{
+headers:{
+Authorization:`Bearer ${token}`
+}
+}
+
+);
+
+getIncome();
+
+}catch(error){
+
+console.log(error);
+
+}
+
+};
+
+
+return(
+
+<div>
+
+<h2>Income</h2>
+
+<input
+
+type="number"
+
+placeholder="Amount"
+
+value={amount}
+
+onChange={(e)=>setAmount(e.target.value)}
+
+/>
+
+<input
+
+placeholder="Description"
+
+value={description}
+
+onChange={(e)=>setDescription(e.target.value)}
+
+/>
+
+<button
+
+onClick={
+
+editId
+
+?
+
+updateIncome
+
+:
+
+addIncome
+
+}
+
+>
+
+{editId ? "Update":"Tambah"}
+
+</button>
+
+{
+
+income.map((item)=>(
+
+<div key={item.id_transaction}>
+
+<p>{item.amount}</p>
+
+<p>{item.description}</p>
+
+<button
+
+onClick={()=>{
+
+setEditId(item.id_transaction);
+
+setAmount(item.amount);
+
+setDescription(item.description);
+
+}}
+
+>
+
+Edit
+
+</button>
+
+<button
+
+onClick={()=>deleteIncome(item.id_transaction)}
+
+>
+
+Hapus
+
+</button>
+
+</div>
+
+))
+
+}
+
+</div>
+
+);
+
+}
 
 export default Income;

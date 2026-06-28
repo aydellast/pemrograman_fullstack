@@ -1,104 +1,198 @@
-import { useState } from "react";
+import {useEffect,useState} from "react";
 
-function Category() {
-  const [categories, setCategories] = useState([
-    { id: 1, name: "Makanan" },
-    { id: 2, name: "Transportasi" },
-    { id: 3, name: "Belanja" },
-  ]);
+import api from "../../services/api";
 
-  const [name, setName] = useState("");
+function Category(){
 
-  const addCategory = () => {
-    if (!name) return;
+const [categories,setCategories]=useState([]);
 
-    setCategories([
-      ...categories,
-      { id: Date.now(), name },
-    ]);
+const [name,setName]=useState("");
 
-    setName("");
-  };
+const [editId,setEditId]=useState(null);
 
-  const deleteCategory = (id) => {
-    setCategories(categories.filter((c) => c.id !== id));
-  };
 
-  return (
-    <div style={styles.container}>
-      <h2>📂 Category Transaction</h2>
+useEffect(()=>{
 
-      <div style={styles.form}>
-        <input
-          style={styles.input}
-          placeholder="Tambah kategori..."
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <button style={styles.btn} onClick={addCategory}>
-          Tambah
-        </button>
-      </div>
+getCategories();
 
-      <div style={styles.list}>
-        {categories.map((item) => (
-          <div key={item.id} style={styles.card}>
-            <span>{item.name}</span>
-            <button
-              style={styles.delete}
-              onClick={() => deleteCategory(item.id)}
-            >
-              Hapus
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+},[]);
+
+
+const getCategories=async()=>{
+
+try{
+
+const response=await api.get(
+"/categories"
+);
+
+setCategories(response.data);
+
+}catch(error){
+
+console.log(error);
+
 }
 
-const styles = {
-  container: {
-    padding: "20px",
-    maxWidth: "500px",
-    margin: "auto",
-    fontFamily: "Arial",
-  },
-  form: {
-    display: "flex",
-    gap: "10px",
-    marginBottom: "20px",
-  },
-  input: {
-    flex: 1,
-    padding: "10px",
-  },
-  btn: {
-    padding: "10px 15px",
-    background: "green",
-    color: "white",
-    border: "none",
-    cursor: "pointer",
-  },
-  list: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-  },
-  card: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "10px",
-    background: "#f2f2f2",
-    borderRadius: "6px",
-  },
-  delete: {
-    background: "red",
-    color: "white",
-    border: "none",
-    padding: "5px 10px",
-    cursor: "pointer",
-  },
 };
+
+
+const addCategory=async()=>{
+
+try{
+
+await api.post(
+
+"/categories",
+
+{
+user_id:1,
+name
+}
+
+);
+
+setName("");
+
+getCategories();
+
+}catch(error){
+
+console.log(error);
+
+}
+
+};
+
+
+const updateCategory=async()=>{
+
+try{
+
+await api.put(
+
+`/categories/${editId}`,
+
+{
+name
+}
+
+);
+
+setEditId(null);
+
+setName("");
+
+getCategories();
+
+}catch(error){
+
+console.log(error);
+
+}
+
+};
+
+
+const deleteCategory=async(id)=>{
+
+try{
+
+await api.delete(
+`/categories/${id}`
+);
+
+getCategories();
+
+}catch(error){
+
+console.log(error);
+
+}
+
+};
+
+
+return(
+
+<div>
+
+<h2>Category</h2>
+
+<input
+
+value={name}
+
+onChange={(e)=>setName(e.target.value)}
+
+/>
+
+<button
+
+onClick={
+
+editId
+
+?
+
+updateCategory
+
+:
+
+addCategory
+
+}
+
+>
+
+{editId ? "Update":"Tambah"}
+
+</button>
+
+{
+
+categories.map((item)=>(
+
+<div key={item.id_category}>
+
+<p>{item.name}</p>
+
+<button
+
+onClick={()=>{
+
+setEditId(item.id_category);
+
+setName(item.name);
+
+}}
+
+>
+
+Edit
+
+</button>
+
+<button
+
+onClick={()=>deleteCategory(item.id_category)}
+
+>
+
+Hapus
+
+</button>
+
+</div>
+
+))
+
+}
+
+</div>
+
+);
+
+}
 
 export default Category;
