@@ -5,8 +5,12 @@ import "./Budget.css";
 
 function Budget() {
   const [budgets, setBudgets] = useState([]);
+  const [categories, setCategories] = useState([]); // State tambahan untuk menampung daftar kategori resmi
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Fitur Pemisah Menu Tampilan (Sub-Tab)
+  const [activeTab, setActiveTab] = useState("input"); // Pilihan: "input" atau "view"
 
   // State Form Input
   const [idCategory, setIdCategory] = useState("");
@@ -14,6 +18,7 @@ function Budget() {
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // 1. Ambil data Anggaran dari Server
   const fetchBudgets = async () => {
     try {
       setLoading(true);
@@ -33,11 +38,28 @@ function Budget() {
     }
   };
 
+  // 2. Ambil data Kategori resmi dari Server (Agar form input menjadi menu Dropdown/Select)
+  const fetchCategories = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await api.get("/categories", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response && Array.isArray(response.data?.data)) {
+        setCategories(response.data.data);
+      } else if (response && Array.isArray(response.data)) {
+        setCategories(response.data);
+      }
+    } catch (err) {
+      console.error("Gagal memuat kategori untuk dropdown:", err);
+    }
+  };
+
   useEffect(() => {
     fetchBudgets();
+    fetchCategories();
   }, []);
 
-  // Handler Tambah Budget
   const handleAddBudget = async (e) => {
     e.preventDefault();
     setFormError("");
@@ -51,26 +73,22 @@ function Budget() {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
       
-      // Membuat format tanggal otomatis untuk bulan ini (YYYY-MM-DD)
       const hariIni = new Date();
       const tahun = hariIni.getFullYear();
       const bulan = String(hariIni.getMonth() + 1).padStart(2, '0');
       
-      const tanggalMulai = `${tahun}-${bulan}-01`; // Awal bulan
-      const tanggalSelesai = `${tahun}-${bulan}-30`; // Akhir bulan (bisa disesuaikan)
+      const tanggalMulai = `${tahun}-${bulan}-01`;
+      const tanggalSelesai = `${tahun}-${bulan}-30`;
 
-      // Mengirim payload lengkap beserta tanggal demi memenuhi syarat backend
       const payloadData = { 
         id_category: Number(idCategory),
-        idCategory: Number(idCategory), // Cadangan camelCase
+        idCategory: Number(idCategory),
         amount: Number(amount),
         start_date: tanggalMulai,
         end_date: tanggalSelesai,
-        startDate: tanggalMulai, // Cadangan camelCase
-        endDate: tanggalSelesai   // Cadangan camelCase
+        startDate: tanggalMulai,
+        endDate: tanggalSelesai   
       };
-
-      console.log("Menembak API dengan data lengkap:", payloadData);
 
       await api.post("/budgets", payloadData, { 
         headers: { Authorization: `Bearer ${token}` } 
@@ -80,6 +98,7 @@ function Budget() {
       setAmount("");
       alert("Anggaran berhasil ditambahkan! 🎉");
       fetchBudgets();
+      setActiveTab("view"); // Otomatis pindah tab ke tampilan hasil setelah sukses input!
     } catch (err) {
       console.error("Error submit budget:", err);
       setFormError(err.response?.data?.message || "Gagal menambah anggaran ke server.");
@@ -88,7 +107,6 @@ function Budget() {
     }
   };
 
-  // Handler Hapus Budget
   const handleDeleteBudget = async (idBudget) => {
     if (!window.confirm("Apakah kamu yakin ingin menghapus anggaran ini?")) return;
 
@@ -106,11 +124,11 @@ function Budget() {
   };
 
   if (loading) {
-    return <div className="budget-page"><p>Memuat data anggaran... ⏳</p></div>;
+    return <div className="budget-page"><p className="budget-loading">Memuat data anggaran... ⏳</p></div>;
   }
 
   if (error) {
-    return <div className="budget-page"><p style={{ color: 'red', textAlign: 'center' }}>⚠️ {error}</p></div>;
+    return <div className="budget-page"><p style={{ color: '#a82e66', textAlign: 'center', fontWeight: 'bold' }}>⚠️ {error}</p></div>;
   }
 
   return (
@@ -120,90 +138,125 @@ function Budget() {
         <p>Kelola pengeluaran dan pemasukan dengan mudah 💸</p>
       </div>
 
-      {/* Form Tambah Budget Baru */}
-      <div className="budget-form-container" style={{ maxWidth: "500px", margin: "0 auto 30px", padding: "20px", background: "#f9f9f9", borderRadius: "10px", boxShadow: "0 2px 5px rgba(0,0,0,0.05)" }}>
-        <h3 style={{ textAlign: "center", marginBottom: "15px" }}>➕ Tambah Anggaran Bulanan</h3>
-        <form onSubmit={handleAddBudget}>
-          <div style={{ marginBottom: "12px" }}>
-            <label style={{ fontWeight: "bold", display: "block" }}>ID Kategori:</label>
-            <input 
-              type="number" 
-              value={idCategory} 
-              onChange={(e) => setIdCategory(e.target.value)} 
-              placeholder="Contoh: 4"
-              style={{ width: "100%", padding: "10px", marginTop: "5px", border: "1px solid #ccc", borderRadius: "5px", boxSizing: "border-box" }}
-            />
-          </div>
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ fontWeight: "bold", display: "block" }}>Nominal Budget (Rp):</label>
-            <input 
-              type="number" 
-              value={amount} 
-              onChange={(e) => setAmount(e.target.value)} 
-              placeholder="Contoh: 50000"
-              style={{ width: "100%", padding: "10px", marginTop: "5px", border: "1px solid #ccc", borderRadius: "5px", boxSizing: "border-box" }}
-            />
-          </div>
-
-          {/* Munculkan pesan error jika validasi gagal */}
-          {formError && (
-            <p style={{ color: "red", fontSize: "14px", fontWeight: "bold", textAlign: "center", margin: "10px 0" }}>
-              {formError}
-            </p>
-          )}
-
-          <button 
-            type="submit" 
-            disabled={isSubmitting} 
-            style={{ width: "100%", background: "#4e43e7", color: "white", border: "none", padding: "12px", borderRadius: "5px", fontSize: "16px", fontWeight: "bold", cursor: "pointer", opacity: isSubmitting ? 0.7 : 1 }}
-          >
-            {isSubmitting ? "Menyimpan... ⏳" : "Simpan Budget"}
-          </button>
-        </form>
+      {/* SUB-TAB MENU NAVIGATION */}
+      <div className="budget-tabs-container">
+        <button 
+          className={`tab-button ${activeTab === "input" ? "active" : ""}`}
+          onClick={() => setActiveTab("input")}
+        >
+          ➕ Buat Anggaran Baru
+        </button>
+        <button 
+          className={`tab-button ${activeTab === "view" ? "active" : ""}`}
+          onClick={() => setActiveTab("view")}
+        >
+          🗂️ Lihat Hasil & Ringkasan ({budgets.length})
+        </button>
       </div>
 
-      {/* BAGIAN YANG DIGANTI: Grid List Kartu Budget Desain Baru */}
-      <div className="budget-grid">
-        {budgets.length === 0 ? (
-          <p style={{ textAlign: "center", gridColumn: "1/-1", color: "#666" }}>
-            Belum ada data anggaran yang diatur untuk user kamu di database.
-          </p>
-        ) : (
-          budgets.map((item) => (
-            <div key={item.id_budget || item.id} className="budget-card">
-              <div>
-                <span className="category-badge">
-                  {item.category_name || item.Category?.name || item.category || `ID: ${item.id_category}`}
-                </span>
-                
-                <p style={{ color: "#64748b", fontSize: "14px", margin: "10px 0 5px 0" }}>Total Anggaran</p>
-                
-                <h3 style={{ fontSize: "1.8rem", color: "#1e293b", margin: 0, fontWeight: "700" }}>
-                  Rp {item.amount ? Number(item.amount).toLocaleString("id-ID") : "0"}
-                </h3>
-                
-                {/* Visual progress bar bulanan */}
-                <div className="budget-progress-container">
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#64748b", marginBottom: "4px" }}>
-                    <span>Penggunaan</span>
-                    <span>70%</span>
-                  </div>
-                  <div className="budget-progress-bar">
-                    <div className="budget-progress-fill"></div>
+      {/* TAB 1: FORM INPUT */}
+      {activeTab === "input" && (
+        <div className="budget-form-container">
+          <h3>Tambah Anggaran Bulanan</h3>
+          <form onSubmit={handleAddBudget}>
+            <div className="form-group">
+              <label>Pilih Kategori:</label>
+              {/* Mengubah elemen input teks biasa menjadi dropdown <select> yang otomatis memetakan ID */}
+              <select 
+                value={idCategory} 
+                onChange={(e) => setIdCategory(e.target.value)}
+                style={{
+                  width: "100%",
+                  border: "1px solid #fbcfe8",
+                  borderRadius: "14px",
+                  padding: "12px 15px",
+                  backgroundColor: "#ffffff",
+                  color: "#8a2b59",
+                  fontSize: "14px",
+                  boxSizing: "border-box"
+                }}
+              >
+                <option value="">-- Silakan Pilih Kategori --</option>
+                {categories.map((cat) => (
+                  <option key={cat.id_category || cat.idCategory || cat.id} value={cat.id_category || cat.idCategory || cat.id}>
+                    {cat.name || cat.name_category || cat.nama_kategori || `Kategori ${cat.id}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="form-group">
+              <label>Nominal Budget (Rp):</label>
+              <input 
+                type="number" 
+                value={amount} 
+                onChange={(e) => setAmount(e.target.value)} 
+                placeholder="Contoh: 50000"
+              />
+            </div>
+
+            {formError && (
+              <p className="error-message-text">
+                {formError}
+              </p>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={isSubmitting} 
+            >
+              {isSubmitting ? "Menyimpan... ⏳" : "Simpan Budget"}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* TAB 2: DAFTAR HASIL INPUT */}
+      {activeTab === "view" && (
+        <div className="budget-grid">
+          {budgets.length === 0 ? (
+            <div className="empty-state-box">
+              <p>Belum ada data anggaran yang diatur untuk user kamu di database.</p>
+              <button onClick={() => setActiveTab("input")} className="btn-redirect-input">Mulai Tambah Sekarang</button>
+            </div>
+          ) : (
+            budgets.map((item) => (
+              <div key={item.id_budget || item.idBudget || item.id} className="budget-card">
+                <div>
+                  {/* PERBAIKAN UTAMA: Penanganan komprehensif pelacakan nama kategori dan ID fallback (camelCase & snake_case) */}
+                  <span className="category-badge">
+                    📌 {item.kategori || "Umum"}
+                  </span>
+                  
+                  <p className="total-budget-label">Total Anggaran</p>
+                  
+                  <h3 className="budget-amount-display">
+                    Rp {item.amount ? Number(item.amount).toLocaleString("id-ID") : "0"}
+                  </h3>
+                  
+                  <div className="budget-progress-container">
+                    <div className="progress-labels">
+                      <span>Penggunaan</span>
+                      <span>70%</span>
+                    </div>
+                    <div className="budget-progress-bar">
+                      <div className="budget-progress-fill"></div>
+                    </div>
                   </div>
                 </div>
+                
+                <div className="action-buttons">
+                  <button className="btn-detail">Detail</button>
+                  {/* PERBAIKAN AMAN: Menjamin pengiriman ID yang valid saat menghapus data anggaran */}
+                  <button onClick={() => handleDeleteBudget(item.id_budget || item.idBudget || item.id)} className="btn-delete">
+                    Hapus
+                  </button>
+                </div>
               </div>
-              
-              <div className="action-buttons">
-                <button className="btn-detail">Detail</button>
-                <button onClick={() => handleDeleteBudget(item.id_budget || item.id)} className="btn-delete">
-                  Hapus
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }
