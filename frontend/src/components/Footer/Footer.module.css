@@ -1,7 +1,25 @@
 .footer {
-  background-color: #111827;
-  color: white;
+  width: min(1450px, 92%);
+  margin: 30px auto 24px;
+  padding: 22px;
+  border-radius: 22px;
+
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-card);
+
   text-align: center;
-  padding: 20px;
-  margin-top: 40px;
+  color: var(--text-muted);
+}
+
+.footer p {
+  margin: 0;
+  font-weight: 800;
+  color: var(--deep-pink);
+}
+
+.footer span {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
 }
