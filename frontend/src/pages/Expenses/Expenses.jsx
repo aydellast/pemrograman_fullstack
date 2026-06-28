@@ -1,29 +1,27 @@
 import React, { useState } from 'react';
 
-// 1. Data Mockup Awal (Sesuai panduan Layered Driven - Constant Data)
 const initialExpenses = [
   { id: 1, title: 'Beli Bahan Dimsum', amount: 150000, category: 'Operasional', date: '2026-05-20' },
   { id: 2, title: 'Gas Elpiji 3kg', amount: 22000, category: 'Dapur', date: '2026-05-22' },
 ];
 
 const Expenses = () => {
-  // 2. State Management untuk List Pengeluaran & Form Input
+  
   const [expenses, setExpenses] = useState(initialExpenses);
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Operasional');
   const [date, setDate] = useState('');
 
-  // 3. Handling Event untuk Form Submit
   const handleSubmit = (e) => {
-    e.preventDefault(); // Mencegah page refresh otomatis
+    e.preventDefault(); 
 
     if (!title || !amount || !date) {
       alert('Mohon isi semua data pengeluaran!');
       return;
     }
 
-    // Buat objek pengeluaran baru dengan ID unik berbasis timestamp
+    
     const newExpense = {
       id: Date.now(),
       title,
@@ -32,10 +30,8 @@ const Expenses = () => {
       date
     };
 
-    // Implemetasi Spread Operator (...) untuk merge array (Panduan hal. 63)
     setExpenses([...expenses, newExpense]);
 
-    // Reset Form Input setelah data tersimpan ke State
     setTitle('');
     setAmount('');
     setDate('');
