@@ -1,54 +1,104 @@
 .navbar {
-  background-color: #4f46e5;
-  color: white;
-  padding: 16px 32px;
+  width: min(1450px, 92%);
+  margin: 24px auto 0;
+  padding: 18px 26px;
+  border-radius: 24px;
+
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(246, 199, 215, 0.9);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(14px);
 
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 24px;
+
+  position: sticky;
+  top: 16px;
+  z-index: 50;
 }
 
-.nav-links {
+.logo {
   display: flex;
-  gap: 20px;
-  list-style: none;
-}
+  align-items: center;
+  gap: 10px;
 
-.nav-links li {
-  cursor: pointer;
-}
-
-@media screen and (max-width: 768px) {
-  .navbar {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .nav-links {
-    flex-direction: column;
-    align-items: center;
-  }
-
-.nav-links a {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--deep-pink);
   text-decoration: none;
-  color: white;
+  white-space: nowrap;
 }
 
-.nav-links a:hover {
-  color: #ddd;
+.logoIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  background: var(--soft-pink);
 
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.navLinks a {
+  text-decoration: none;
+  color: var(--text-main);
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.navLinks a:hover {
+  background: var(--soft-pink);
+  color: var(--dark-pink);
+}
+
+.authLink {
+  color: var(--dark-pink) !important;
+}
+
+.registerLink {
+  background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink));
+  color: white !important;
+  box-shadow: 0 8px 20px rgba(244, 143, 177, 0.35);
+}
 
 .logoutBtn {
-  background-color: #ef4444;
-  color: white;
   border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff0f5;
+  color: var(--dark-pink);
+  font-weight: 800;
   cursor: pointer;
+  border: 1px solid var(--border-soft);
 }
 
 .logoutBtn:hover {
-  background-color: #dc2626;
+  background: var(--soft-pink);
 }
+
+@media screen and (max-width: 900px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navLinks {
+    justify-content: flex-start;
+  }
 }
