@@ -1,193 +1,267 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Chart from "../../pages/Charts/ChartsPage";
-
-const currentExpenses = [
-  {
-    id: 1,
-    title: "Beli Bahan Dimsum",
-    amount: 150000,
-    category: "Operasional",
-    date: "2026-05-20",
-  },
-  {
-    id: 2,
-    title: "Gas Elpiji 3kg",
-    amount: 22000,
-    category: "Dapur",
-    date: "2026-05-22",
-  },
-];
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import api from "../../services/api";
+import styles from "./Dashboard.module.css";
 
 function Dashboard() {
   const username = localStorage.getItem("username") || "User";
 
-  const totalExpenses = currentExpenses.reduce(
-    (sum, item) => sum + item.amount,
-    0
+  const [summary, setSummary] = useState({
+    totalBalance: 6500000,
+    totalIncome: 19500000,
+    totalExpense: 13000000,
+    totalSaving: 4000000,
+  });
+
+  const [chartData, setChartData] = useState([
+    { month: "Jan", income: 4000000, expense: 2500000 },
+    { month: "Feb", income: 5000000, expense: 3000000 },
+    { month: "Mar", income: 4500000, expense: 3500000 },
+    { month: "Apr", income: 6000000, expense: 4000000 },
+  ]);
+
+  const [activities, setActivities] = useState([
+    {
+      id: 1,
+      title: "Beli Bahan Dimsum",
+      category: "Operasional",
+      amount: 150000,
+      type: "Expense",
+    },
+    {
+      id: 2,
+      title: "Gas Elpiji 3kg",
+      category: "Dapur",
+      amount: 22000,
+      type: "Expense",
+    },
+    {
+      id: 3,
+      title: "Gaji Bulanan",
+      category: "Gaji",
+      amount: 5000000,
+      type: "Income",
+    },
+  ]);
+
+  const [savingGoal, setSavingGoal] = useState({
+    goal_name: "Laptop Gaming",
+    target_amount: 10000000,
+    current_amount: 4000000,
+  });
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await api.get("/dashboard");
+
+      if (response.data?.summary) {
+        setSummary(response.data.summary);
+      }
+
+      if (response.data?.chartData) {
+        setChartData(response.data.chartData);
+      }
+
+      if (response.data?.activities) {
+        setActivities(response.data.activities);
+      }
+
+      if (response.data?.savingGoal) {
+        setSavingGoal(response.data.savingGoal);
+      }
+    } catch (error) {
+      console.log("Dashboard memakai data sementara:", error.message);
+    }
+  };
+
+  const savingProgress = Math.round(
+    (Number(savingGoal.current_amount) / Number(savingGoal.target_amount)) * 100
   );
 
-  const operasionalTotal = currentExpenses
-    .filter((item) => item.category === "Operasional")
-    .reduce((sum, item) => sum + item.amount, 0);
-
-  const dapurTotal = currentExpenses
-    .filter((item) => item.category === "Dapur")
-    .reduce((sum, item) => sum + item.amount, 0);
-
   return (
-    <section className="page-shell">
-      <div style={heroStyle}>
+    <section className={styles.dashboard}>
+      <div className={styles.topbar}>
         <div>
-          <p style={eyebrowStyle}>Smart Finance Tracker</p>
-          <h1 className="page-title">Dashboard</h1>
-          <p className="page-subtitle">Welcome back, {username} 💕</p>
+          <h1>Welcome Back, {username}</h1>
+          <p>Here is your financial summary today.</p>
         </div>
 
-        <Link to="/expenses" className="primary-button">
-          💸 Kelola Pengeluaran
-        </Link>
-      </div>
-
-      <div style={summaryGridStyle}>
-        <div style={summaryCardStyle}>
-          <span style={cardIconStyle}>🧾</span>
-          <h4>Total Pengeluaran Bulan Ini</h4>
-          <h2>Rp {totalExpenses.toLocaleString("id-ID")}</h2>
+        <div className={styles.searchBox}>
+          <input type="text" placeholder="Search transactions..." />
         </div>
 
-        <div style={summaryCardStyle}>
-          <span style={cardIconStyle}>🍳</span>
-          <h4>Biaya Operasional</h4>
-          <h2>Rp {operasionalTotal.toLocaleString("id-ID")}</h2>
-        </div>
-
-        <div style={summaryCardStyle}>
-          <span style={cardIconStyle}>🧁</span>
-          <h4>Biaya Keperluan Dapur</h4>
-          <h2>Rp {dapurTotal.toLocaleString("id-ID")}</h2>
+        <div className={styles.userBadge}>
+          <img src="/logo-cuppycash.jpeg" alt="User" />
+          <span>{username}</span>
         </div>
       </div>
 
-      <div className="page-card" style={{ marginBottom: "28px" }}>
-        <Chart />
-      </div>
+      <div className={styles.dashboardGrid}>
+        <main className={styles.mainContent}>
+          <div className={styles.cardsGrid}>
+            <SummaryCard
+              title="Total Balance"
+              amount={summary.totalBalance}
+              icon="💼"
+              variant="teal"
+            />
 
-      <div className="page-card">
-        <div style={sectionHeaderStyle}>
-          <div>
-            <h3 style={{ margin: 0, color: "var(--deep-pink)" }}>
-              Aktivitas Transaksi Terakhir
-            </h3>
-            <p style={{ margin: "6px 0 0", color: "var(--text-muted)" }}>
-              Ringkasan pengeluaran terbaru dari CuppyCash
-            </p>
+            <SummaryCard
+              title="Total Expense"
+              amount={summary.totalExpense}
+              icon="🧾"
+              variant="pink"
+            />
+
+            <SummaryCard
+              title="Total Savings"
+              amount={summary.totalSaving}
+              icon="🎯"
+              variant="purple"
+            />
           </div>
-        </div>
 
-        <table className="table-soft">
-          <thead>
-            <tr>
-              <th>Tanggal</th>
-              <th>Deskripsi</th>
-              <th>Kategori</th>
-              <th style={{ textAlign: "right" }}>Nominal</th>
-            </tr>
-          </thead>
+          <div className={styles.chartCard}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <h2>Income vs Expense</h2>
+                <p>Monthly financial movement</p>
+              </div>
 
-          <tbody>
-            {currentExpenses.map((item) => (
-              <tr key={item.id}>
-                <td>{item.date}</td>
-                <td>{item.title}</td>
-                <td>
-                  <span style={badgeStyle}>{item.category}</span>
-                </td>
-                <td
-                  style={{
-                    textAlign: "right",
-                    color: "var(--dark-pink)",
-                    fontWeight: "800",
-                  }}
-                >
-                  - Rp {item.amount.toLocaleString("id-ID")}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              <Link to="/charts">View detail</Link>
+            </div>
+
+            <div className={styles.chartWrap}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="incomePink" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#ff5fa2" stopOpacity={0.55} />
+                      <stop offset="95%" stopColor="#ff5fa2" stopOpacity={0.04} />
+                    </linearGradient>
+                  </defs>
+
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f2d4df" />
+                  <XAxis dataKey="month" stroke="#9b7a89" />
+                  <YAxis stroke="#9b7a89" />
+
+                  <Tooltip
+                    formatter={(value) =>
+                      `Rp ${Number(value).toLocaleString("id-ID")}`
+                    }
+                  />
+
+                  <Area
+                    type="monotone"
+                    dataKey="income"
+                    stroke="#ff4f9a"
+                    fill="url(#incomePink)"
+                    strokeWidth={3}
+                    name="Income"
+                  />
+
+                  <Area
+                    type="monotone"
+                    dataKey="expense"
+                    stroke="#b35cff"
+                    fill="#f1d9ff"
+                    strokeWidth={3}
+                    name="Expense"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </main>
+
+        <aside className={styles.sidePanel}>
+          <div className={styles.panelCard}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <h2>Recent Activities</h2>
+                <p>Latest transactions</p>
+              </div>
+            </div>
+
+            <div className={styles.activityList}>
+              {activities.slice(0, 5).map((item) => (
+                <div key={item.id} className={styles.activityItem}>
+                  <span
+                    className={
+                      item.type === "Income"
+                        ? styles.activityIconIncome
+                        : styles.activityIconExpense
+                    }
+                  >
+                    {item.type === "Income" ? "+" : "−"}
+                  </span>
+
+                  <div>
+                    <h4>{item.title}</h4>
+                    <p>{item.category}</p>
+                  </div>
+
+                  <strong>
+                    Rp {Number(item.amount).toLocaleString("id-ID")}
+                  </strong>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.panelCard}>
+            <h2>Saving Goal</h2>
+            <p className={styles.goalName}>{savingGoal.goal_name}</p>
+
+            <div className={styles.progressInfo}>
+              <span>
+                Rp {Number(savingGoal.current_amount).toLocaleString("id-ID")}
+              </span>
+              <span>
+                Rp {Number(savingGoal.target_amount).toLocaleString("id-ID")}
+              </span>
+            </div>
+
+            <div className={styles.progressBar}>
+              <div style={{ width: `${savingProgress}%` }} />
+            </div>
+
+            <p className={styles.progressText}>{savingProgress}% tercapai</p>
+
+            <Link to="/saving-goals" className={styles.smallButton}>
+              Manage Goal
+            </Link>
+          </div>
+        </aside>
       </div>
     </section>
   );
 }
 
-const heroStyle = {
-  width: "min(1450px, 92%)",
-  margin: "0 auto 28px",
-  padding: "34px",
-  borderRadius: "30px",
-  background:
-    "linear-gradient(135deg, rgba(255,255,255,0.92), rgba(253,226,236,0.9))",
-  border: "1px solid var(--border-soft)",
-  boxShadow: "var(--shadow-soft)",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: "20px",
-  flexWrap: "wrap",
-};
+function SummaryCard({ title, amount, icon, variant }) {
+  return (
+    <div className={`${styles.summaryCard} ${styles[variant]}`}>
+      <div className={styles.cardTop}>
+        <span>{icon}</span>
+      </div>
 
-const eyebrowStyle = {
-  margin: "0 0 10px",
-  color: "var(--dark-pink)",
-  fontWeight: "900",
-  letterSpacing: "0.08em",
-  textTransform: "uppercase",
-  fontSize: "13px",
-};
-
-const summaryGridStyle = {
-  width: "min(1450px, 92%)",
-  margin: "0 auto 28px",
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-  gap: "20px",
-};
-
-const summaryCardStyle = {
-  background: "rgba(255,255,255,0.9)",
-  border: "1px solid var(--border-soft)",
-  borderRadius: "26px",
-  padding: "26px",
-  boxShadow: "var(--shadow-card)",
-  textAlign: "center",
-};
-
-const cardIconStyle = {
-  display: "inline-flex",
-  justifyContent: "center",
-  alignItems: "center",
-  width: "50px",
-  height: "50px",
-  borderRadius: "18px",
-  background: "var(--soft-pink)",
-  fontSize: "24px",
-};
-
-const sectionHeaderStyle = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: "18px",
-};
-
-const badgeStyle = {
-  background: "var(--soft-pink)",
-  color: "var(--dark-pink)",
-  padding: "6px 12px",
-  borderRadius: "999px",
-  fontSize: "13px",
-  fontWeight: "800",
-};
+      <p>{title}</p>
+      <h2>Rp {Number(amount).toLocaleString("id-ID")}</h2>
+    </div>
+  );
+}
 
 export default Dashboard;
