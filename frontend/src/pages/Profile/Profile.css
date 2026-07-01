@@ -1,83 +1,270 @@
-body {
-  background-color: #f4f7fb;
-  font-family: Arial, Helvetica, sans-serif;
+/* Container Utama */
+.bento-wrapper-page {
+  max-width: 1140px;
+  margin: 40px auto;
+  padding: 0 24px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-.profile-page {
-  display: flex;
-  justify-content: center;
-  margin-top: 50px;
-  padding: 20px;
-}
-
-.profile-card {
-  width: 900px;
-  background: white;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-}
-
-.profile-header {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  padding: 40px;
-  text-align: center;
-  color: white;
-}
-
-.profile-image {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  border: 5px solid white;
-  object-fit: cover;
-  margin-bottom: 15px;
-}
-
-.profile-header h1 {
-  margin: 10px 0 5px;
-}
-
-.profile-email {
-  opacity: 0.9;
-}
-
-.profile-body {
-  padding: 30px;
-}
-
-.profile-box {
-  background: #f9fafb;
-  padding: 20px;
-  border-radius: 15px;
+/* Header Penyambut */
+.profile-welcome-header {
   margin-bottom: 25px;
 }
-
-.profile-box h3 {
-  margin-bottom: 10px;
-  color: #4f46e5;
+.profile-welcome-header h1 {
+  color: #8a2b59;
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+}
+.profile-welcome-header p {
+  color: #a37089;
+  font-size: 1rem;
+  margin: 0;
 }
 
-.profile-stats {
+/* Sistem Bento Grid Premium */
+.bento-profile-container {
   display: grid;
-  grid-template-columns: repeat(3,1fr);
+  grid-template-columns: 320px 1fr 1fr;
+  grid-auto-rows: minmax(160px, auto);
+  gap: 24px;
+  width: 100%;
+}
+
+/* Base Bento Card */
+.bento-card {
+  background: #ffffff !important;
+  border: 1px solid #fce7f3 !important;
+  border-radius: 30px !important;
+  padding: 26px !important;
+  box-shadow: 0 10px 30px rgba(243, 143, 188, 0.05) !important;
+  position: relative;
+  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.bento-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 20px 40px rgba(168, 46, 102, 0.1) !important;
+  border-color: #ff70a6 !important;
+}
+
+/* ==========================================
+   KARTU HERO UTAMA (KIRI)
+   ========================================== */
+.card-hero {
+  grid-column: 1 !important;
+  grid-row: 1 / span 3 !important;
+  background: linear-gradient(135deg, #8a2b59 0%, #ff70a6 100%) !important;
+  color: white !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  border: none !important;
+  cursor: pointer !important;
+}
+
+.bento-avatar-wrapper {
+  width: 130px !important;
+  height: 130px !important;
+  border-radius: 50% !important;
+  border: 5px solid rgba(255, 255, 255, 0.25) !important;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.bento-avatar-wrapper img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Overlay saat hover foto profil */
+.avatar-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(138, 43, 89, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.avatar-overlay span {
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.bento-card.card-hero:hover .bento-avatar-wrapper {
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.03);
+}
+.bento-card.card-hero:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.card-hero h2 {
+  color: #ffffff !important;
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  margin: 0 0 4px 0 !important;
+}
+.bento-hero-email {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 14px !important;
+  margin: 0 0 20px 0 !important;
+}
+.bento-badge-premium {
+  background: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(5px);
+  padding: 8px 18px !important;
+  border-radius: 30px !important;
+  font-size: 12px !important;
+  font-weight: 700;
+}
+
+/* ==========================================
+   KARTU ABOUT ME (KANAN ATAS)
+   ========================================== */
+.card-about {
+  grid-column: 2 / span 2 !important;
+  grid-row: 1 !important;
+  background: #ffffff !important;
+  border-left: 6px solid #a82e66 !important;
+  justify-content: space-between !important;
+}
+.bento-card-icon-top {
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+.card-about h3 {
+  color: #8a2b59 !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  margin: 0 0 8px 0 !important;
+}
+.card-about p {
+  color: #5c3c4c !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  font-style: italic;
+  margin: 0 0 15px 0 !important;
+}
+.card-badge-footer {
+  align-self: flex-start;
+  font-size: 11px;
+  background: #fff1f6;
+  color: #a82e66;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+/* ==========================================
+   KARTU STATISTIK KECIL & BESAR
+   ========================================== */
+.stat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.stat-icon-box {
+  background: #fff1f6;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 18px;
+}
+.stat-icon-box.large {
+  width: 55px;
+  height: 55px;
+  font-size: 28px;
+  border-radius: 16px;
+}
+.stat-label {
+  color: #a37089 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+}
+.stat-value {
+  font-size: 38px !important;
+  font-weight: 800 !important;
+  margin: 12px 0 6px 0 !important;
+  line-height: 1 !important;
+  color: #8a2b59 !important;
+}
+.stat-desc {
+  color: #a37089 !important;
+  font-size: 13px !important;
+}
+
+/* Modifikasi Khusus Tiap Kartu Stat */
+.card-pink-glow {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  background: linear-gradient(to bottom right, #ffffff, #fff5f8) !important;
+}
+.card-maroon-glow {
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+}
+
+/* Progress bar mini pada rate tabungan */
+.stat-progress-bar-mini {
+  background: #fff1f6;
+  height: 6px;
+  border-radius: 10px;
+  margin: 5px 0 10px 0;
+  overflow: hidden;
+}
+.stat-fill-mini {
+  background: #ff70a6;
+  height: 100%;
+  border-radius: 10px;
+}
+
+/* Kartu Baris Terakhir (Full Width di sisi kanan) */
+.card-full-width {
+  grid-column: 2 / span 2 !important;
+  grid-row: 3 !important;
+  justify-content: center !important;
+  background: linear-gradient(to right, #ffffff, #fff1f6) !important;
+}
+.card-flex-row {
+  display: flex;
+  align-items: center;
   gap: 20px;
 }
+.stat-text-side .stat-value {
+  margin: 4px 0 !important;
+  font-size: 26px !important;
+}
 
-.stats-card {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-  padding: 25px;
-  border-radius: 15px;
+/* Loading & Error Box States */
+.profile-loading-box, .profile-error-box {
   text-align: center;
-  transition: 0.3s;
+  padding: 80px 0;
+  color: #8a2b59;
 }
-
-.stats-card:hover {
-  transform: translateY(-5px);
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #fff1f6;
+  border-top-color: #ff70a6;
+  border-radius: 50%;
+  margin: 0 auto 20px auto;
+  animation: spin 1s linear infinite;
 }
-
-.stats-card h2 {
-  font-size: 32px;
-  margin-bottom: 5px;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
