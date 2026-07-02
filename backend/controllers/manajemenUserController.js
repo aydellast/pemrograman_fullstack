@@ -1,164 +1,154 @@
-const userModel = require('../models/manajemenUserModel');
-const jwt = require('jsonwebtoken');
+const bcrypt = require("bcrypt");
+const userModel = require("../models/manajemenUserModel");
 
-// ==============================
-// REGISTER
-// ==============================
-exports.register = async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
-
-    await userModel.create({
-      username,
-      email,
-      password
-    });
-
-    res.status(201).json({
-      message: "Registrasi berhasil! Silakan login."
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      message: "Gagal register",
-      error: error.message
-    });
-  }
+const getUserId = (req) => {
+  return req.user?.id_user || req.user?.id;
 };
 
-// ==============================
-// LOGIN
-// ==============================
-exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const users = await userModel.findByEmail(email);
-
-    if (users.length === 0 || users[0].password !== password) {
-      return res.status(401).json({
-        message: "Email atau password salah!"
-      });
-    }
-
-    const user = users[0];
-
-    const secretKey =
-      process.env.JWT_SECRET || 'rahasia_cuppycash_super_aman';
-
-    const token = jwt.sign(
-      {
-        id: user.id_user,
-        id_user: user.id_user,
-        email: user.email
-      },
-      secretKey,
-      { expiresIn: '1h' }
-    );
-
-    res.json({
-      message: "Login berhasil!",
-      token
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      message: "Terjadi kesalahan di server",
-      error: error.message
-    });
-  }
-};
-
-// ==============================
-// GET PROFILE
-// ==============================
 exports.getProfile = async (req, res) => {
   try {
+    const userId = getUserId(req);
 
-    if (!req.user) {
+    if (!userId) {
       return res.status(401).json({
-        message: "Unauthorized"
+        message: "User tidak terdeteksi. Silakan login ulang.",
       });
     }
 
-    const rows = await userModel.getUserById(req.user.id_user);
+    const rows = await userModel.getUserById(userId);
 
     if (rows.length === 0) {
       return res.status(404).json({
-        message: "User tidak ditemukan"
+        message: "User tidak ditemukan.",
       });
     }
 
-    res.json({
-      ...rows[0],
-      profile_picture: rows[0].profile_picture
-        ? `http://localhost:3000/uploads/${rows[0].profile_picture}`
-        : null
-    });
+    const user = rows[0];
+    const stats = await userModel.getProfileStats(userId);
 
+    res.status(200).json({
+      message: "Profile berhasil diambil",
+      data: {
+        id_user: user.id_user,
+        username: user.username,
+        email: user.email,
+        foto_profil: user.foto_profil,
+        profile_picture: user.foto_profil
+          ? `http://localhost:3000/uploads/${user.foto_profil}`
+          : null,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+
+        total_income: stats.total_income,
+        total_expense: stats.total_expense,
+        saving_rate: stats.saving_rate,
+        active_budget: stats.active_budget,
+        category_count: stats.category_count,
+        category_names: stats.category_names,
+      },
+    });
   } catch (error) {
+    console.error("GET PROFILE ERROR:", error);
+
     res.status(500).json({
       message: "Gagal mengambil profil",
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-// ==============================
-// UPDATE PROFILE + UPLOAD FOTO
-// ==============================
 exports.updateProfile = async (req, res) => {
   try {
+    const userId = getUserId(req);
 
-    if (!req.user) {
+    if (!userId) {
       return res.status(401).json({
-        message: "Unauthorized"
+        message: "User tidak terdeteksi. Silakan login ulang.",
       });
     }
 
     const { username, email, password } = req.body;
 
-    // ambil file upload dari multer
-    let profile_picture = null;
-
-    if (req.file) {
-      profile_picture = req.file.filename;
-    }
-
-    // VALIDASI
     if (!username || !email) {
       return res.status(400).json({
-        message: "Username dan email wajib diisi"
+        message: "Username dan email wajib diisi.",
       });
     }
 
-    if (!email.includes('@')) {
+    if (!email.includes("@")) {
       return res.status(400).json({
-        message: "Format email tidak valid"
+        message: "Format email tidak valid.",
       });
     }
 
-    if (password && password.length < 5) {
-      return res.status(400).json({
-        message: "Password minimal 5 karakter"
-      });
-    }
-
-    await userModel.updateUser(req.user.id_user, {
+    const updateData = {
       username,
       email,
-      password,
-      profile_picture
-    });
+    };
 
-    res.json({
-      message: "Profil berhasil diupdate"
-    });
+    if (password && password.trim() !== "") {
+      if (password.length < 8) {
+        return res.status(400).json({
+          message: "Password minimal 8 karakter.",
+        });
+      }
 
+      updateData.password = await bcrypt.hash(password, 12);
+    }
+
+    if (req.file) {
+      updateData.foto_profil = req.file.filename;
+    }
+
+    await userModel.updateProfile(userId, updateData);
+
+    res.status(200).json({
+      message: "Profil berhasil diperbarui.",
+    });
   } catch (error) {
+    console.error("UPDATE PROFILE ERROR:", error);
+
     res.status(500).json({
       message: "Gagal update profil",
-      error: error.message
+      error: error.message,
+    });
+  }
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const db = require("../config/database");
+
+    const sql = `
+      SELECT
+        id_user,
+        username,
+        email,
+        role,
+        foto_profil,
+        created_at,
+        updated_at
+      FROM users
+      ORDER BY id_user DESC
+    `;
+
+    db.query(sql, (err, results) => {
+      if (err) {
+        return res.status(500).json({
+          message: "Gagal mengambil data semua user",
+          error: err.message,
+        });
+      }
+
+      res.status(200).json({
+        message: "Data semua user berhasil diambil",
+        data: results,
+      });
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
     });
   }
 };

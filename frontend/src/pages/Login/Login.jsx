@@ -7,25 +7,51 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setMessage("");
+
+    if (!email.trim() || !password) {
+      setMessage("Email dan password wajib diisi.");
+      return;
+    }
+
     try {
+      setLoading(true);
+
       const response = await api.post("/auth/login", {
-        email,
+        email: email.trim().toLowerCase(),
         password,
       });
 
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem(
-        "username",
-        response.data.user?.username || email
-      );
+      const token = response.data?.token;
+      const user = response.data?.user;
+
+      if (!token || !user) {
+        setMessage("Response login tidak valid dari server.");
+        return;
+      }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("username", user.username || email);
+      localStorage.setItem("role", user.role || "User");
 
       alert("Login berhasil!");
-      window.location.href = "/";
+
+      window.location.href = "/dashboard";
     } catch (error) {
-      alert(error.response?.data?.message || "Login gagal");
+      console.error("LOGIN ERROR:", error);
+
+      setMessage(
+        error.response?.data?.message || "Login gagal."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,7 +61,14 @@ function Login() {
         <div className={styles.brandCircle}>💗</div>
 
         <h1>Welcome Back</h1>
+
         <p>Masuk ke akun CuppyCash kamu</p>
+
+        {message && (
+          <div className={styles.errorBox}>
+            {message}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <input
@@ -46,16 +79,30 @@ function Login() {
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          <input
-            className="soft-input"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className={styles.passwordWrapper}>
+            <input
+              className="soft-input"
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
-          <button className="primary-button" type="submit">
-            Login
+            <button
+              type="button"
+              className={styles.showButton}
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+
+          <button
+            className="primary-button"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? "Memproses..." : "Login"}
           </button>
         </form>
 

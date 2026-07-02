@@ -1,33 +1,32 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
-const verifyToken = (req, res, next) => {
-    // 1. Cek apakah user membawa Karcis di dalam kantong "Authorization"
-    const authHeader = req.header('Authorization');
-    if (!authHeader) {
-        return res.status(401).json({ message: "Akses ditolak! Kamu harus login dulu." });
-    }
+const authMiddleware = (req, res, next) => {
+  const authHeader =
+    req.headers.authorization || req.headers.Authorization;
 
-    // 2. Format Karcis yang benar adalah "Bearer <token_panjang_kamu>"
-    // Kita pisahkan kata "Bearer" dan ambil tokennya saja
-    const token = authHeader.split(' ')[1];
-    if (!token) {
-        return res.status(401).json({ message: "Format token salah!" });
-    }
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      message: "Token tidak ditemukan. Silakan login ulang.",
+    });
+  }
 
-    try {
-        // 3. Satpam mengecek keaslian token menggunakan Kunci Rahasia yang SAMA
-        // Ganti baris di bawah ini agar menggunakan 'RAHASIA_TOKEN'
-        const secretKey = process.env.JWT_SECRET || 'RAHASIA_TOKEN'; 
-        const verified = jwt.verify(token, secretKey);
-        
-        // 4. Kalau asli, catat identitas user
-        req.user = verified; 
-        
-        next(); 
-    } catch (err) {
-        // Kalau tokennya kedaluwarsa atau palsu
-        res.status(400).json({ message: "Token tidak valid atau sudah kedaluwarsa! Silakan login ulang." });
-    }
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "RAHASIA_TOKEN"
+    );
+
+    req.user = decoded;
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      message: "Token tidak valid atau sudah expired.",
+      error: error.message,
+    });
+  }
 };
 
-module.exports = verifyToken;
+module.exports = authMiddleware;

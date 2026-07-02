@@ -1,14 +1,30 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const chartController = require('../controllers/chartController');
+const chartController = require("../controllers/chartController");
+const verifyToken = require("../middleware/authMiddleware");
 
-// PERBAIKAN 1: Hapus kurung kurawal karena di middleware diexport langsung
-const verifyToken = require('../middleware/authMiddleware');
+router.get("/summary", verifyToken, chartController.getChartSummary);
 
-// Rute Expense (Sudah aman)
-router.get('/expense', verifyToken, chartController.getExpenseChart);
+router.get("/monthly", verifyToken, chartController.getMonthlyChart);
 
+router.get(
+  "/expense-category",
+  verifyToken,
+  chartController.getExpenseCategoryChart
+);
 
+router.get(
+  "/income-category",
+  verifyToken,
+  chartController.getIncomeCategoryChart
+);
+
+// Route lama tetap dipertahankan supaya tidak error kalau masih ada yang pakai
+router.get(
+  "/expense",
+  verifyToken,
+  chartController.getExpenseCategoryChart
+);
 
 module.exports = router;

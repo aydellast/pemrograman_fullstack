@@ -1,0 +1,149 @@
+.admin-users-page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  padding: 28px 30px 36px 6px;
+}
+
+.admin-users-hero {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid #f5c8d8;
+  border-radius: 30px;
+  padding: 28px;
+  box-shadow: 0 18px 42px rgba(159, 49, 95, 0.12);
+  margin-bottom: 24px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.admin-users-eyebrow {
+  margin: 0 0 8px;
+  color: #c94f7c;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.admin-users-hero h1 {
+  margin: 0;
+  color: #302333;
+  font-size: 32px;
+}
+
+.admin-users-hero p {
+  margin: 8px 0 0;
+  color: #9b7a89;
+  font-weight: 700;
+}
+
+.admin-users-hero button {
+  border: none;
+  border-radius: 16px;
+  padding: 13px 18px;
+  background: #c94f7c;
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-users-card {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid #f5c8d8;
+  border-radius: 30px;
+  padding: 28px;
+  box-shadow: 0 18px 42px rgba(159, 49, 95, 0.12);
+}
+
+.admin-users-header h2 {
+  margin: 0;
+  color: #302333;
+  font-size: 26px;
+}
+
+.admin-users-header p {
+  margin: 8px 0 20px;
+  color: #9b7a89;
+  font-weight: 700;
+}
+
+.admin-users-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-users-table th,
+.admin-users-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #f8d7e5;
+  color: #3f2f3f;
+  font-weight: 700;
+}
+
+.admin-users-table th {
+  color: #8a2b59;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.role-badge.admin {
+  background: #fff0f6;
+  color: #c94f7c;
+}
+
+.role-badge.user {
+  background: #ddfff9;
+  color: #0ca895;
+}
+
+.admin-users-state,
+.admin-users-error {
+  padding: 22px;
+  border-radius: 20px;
+  text-align: center;
+  font-weight: 900;
+}
+
+.admin-users-state {
+  background: #fff8fb;
+  color: #9b7a89;
+}
+
+.admin-users-error {
+  background: #fff0f0;
+  color: #d64545;
+  margin-bottom: 20px;
+}
+
+@media screen and (max-width: 900px) {
+  .admin-users-page {
+    padding: 20px 16px 32px;
+  }
+
+  .admin-users-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-users-hero button {
+    width: 100%;
+  }
+}

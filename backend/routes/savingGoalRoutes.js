@@ -3,24 +3,33 @@ const router = express.Router();
 
 const verifyToken = require("../middleware/authMiddleware");
 const savingGoalController = require("../controllers/savingGoalController");
-const upload = require("../middleware/uploadMiddleware"); // ⬅️ TAMBAH INI
 
-// GET goals
 router.get("/", verifyToken, savingGoalController.getGoals);
 
-// POST goal + upload gambar (SPRINT 7)
-router.post(
-  "/",
+router.get("/:id", verifyToken, savingGoalController.getGoalById);
+
+router.post("/", verifyToken, savingGoalController.createGoal);
+
+router.put("/:id", verifyToken, savingGoalController.updateGoal);
+
+router.delete("/:id", verifyToken, savingGoalController.deleteGoal);
+
+router.get(
+  "/:id/contributions",
   verifyToken,
-  upload.single("gambar_target"), // ⬅️ INI KUNCI NYA
-  savingGoalController.createGoal
+  savingGoalController.getContributions
 );
 
-// POST kontribusi
 router.post(
-  "/:id/contribution",
+  "/:id/contributions",
   verifyToken,
   savingGoalController.addContribution
+);
+
+router.delete(
+  "/contributions/:idContribution",
+  verifyToken,
+  savingGoalController.deleteContribution
 );
 
 module.exports = router;

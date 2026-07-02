@@ -1,0 +1,268 @@
+.category-page {
+  padding: 28px 30px 36px 6px;
+}
+
+.category-header {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #f5c8d8;
+  border-radius: 30px;
+  padding: 30px;
+  box-shadow: 0 18px 42px rgba(159, 49, 95, 0.12);
+  margin-bottom: 24px;
+}
+
+.category-eyebrow {
+  margin: 0 0 10px;
+  color: #c94f7c;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.category-header h1 {
+  margin: 0;
+  color: #302333;
+  font-size: 34px;
+}
+
+.category-header p {
+  margin: 8px 0 0;
+  color: #9b7a89;
+  font-weight: 600;
+}
+
+.category-layout {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 24px;
+}
+
+.category-form-card,
+.category-list-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #f5c8d8;
+  border-radius: 30px;
+  box-shadow: 0 18px 42px rgba(159, 49, 95, 0.12);
+  padding: 26px;
+}
+
+.category-form-card h2,
+.category-list-card h2 {
+  margin: 0;
+  color: #302333;
+  font-size: 24px;
+}
+
+.category-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #8a2b59;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  border: 1px solid #f3bfd2;
+  outline: none;
+  border-radius: 16px;
+  padding: 13px 14px;
+  background: #fff8fb;
+  color: #3f2f3f;
+  font-weight: 700;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #c94f7c;
+  box-shadow: 0 0 0 4px rgba(201, 79, 124, 0.12);
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary {
+  border: none;
+  border-radius: 16px;
+  padding: 12px 18px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #c94f7c;
+  color: white;
+  box-shadow: 0 10px 22px rgba(201, 79, 124, 0.22);
+}
+
+.btn-secondary {
+  background: #fff0f6;
+  color: #c94f7c;
+  border: 1px solid #f3bfd2;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.list-header p {
+  margin: 6px 0 0;
+  color: #9b7a89;
+  font-weight: 600;
+}
+
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  background: #fff8fb;
+  border: 1px solid #f8d7e5;
+  border-radius: 22px;
+  padding: 16px;
+  transition: 0.18s ease;
+}
+
+.category-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(159, 49, 95, 0.1);
+}
+
+.category-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.category-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+}
+
+.category-icon.income {
+  background: #ddfff9;
+  color: #0ca895;
+}
+
+.category-icon.expense {
+  background: #ffe0ec;
+  color: #d34b81;
+}
+
+.category-info h3 {
+  margin: 0;
+  color: #302333;
+  font-size: 17px;
+}
+
+.category-info p {
+  margin: 4px 0 0;
+  color: #9b7a89;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.category-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.edit-btn,
+.delete-btn {
+  border: none;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.edit-btn {
+  background: #f7d8e5;
+  color: #a73568;
+}
+
+.delete-btn {
+  background: #fff0f0;
+  color: #d64545;
+}
+
+.category-state,
+.category-error {
+  padding: 22px;
+  border-radius: 20px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.category-state {
+  background: #fff8fb;
+  color: #9b7a89;
+}
+
+.category-error {
+  background: #fff0f0;
+  color: #d64545;
+}
+
+@media screen and (max-width: 1100px) {
+  .category-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .category-page {
+    padding: 20px 16px 32px;
+  }
+
+  .category-header h1 {
+    font-size: 28px;
+  }
+
+  .category-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .category-actions {
+    width: 100%;
+  }
+
+  .edit-btn,
+  .delete-btn {
+    flex: 1;
+  }
+}

@@ -1,66 +1,77 @@
-const db = require('../config/database');
+const db = require("../config/database");
 
 const Category = {
+  create: (data, callback) => {
+    const sql = `
+      INSERT INTO categories (id_user, name, type)
+      VALUES (?, ?, ?)
+    `;
 
-    // CREATE CATEGORY
-    create: (data, callback) => {
+    db.query(
+      sql,
+      [data.id_user, data.name, data.type],
+      callback
+    );
+  },
 
-        const sql = `
-            INSERT INTO categories (user_id, name)
-            VALUES (?, ?)
-        `;
+  getAllByUser: (id_user, callback) => {
+    const sql = `
+      SELECT 
+        id_category,
+        id_user,
+        name,
+        type,
+        created_at,
+        updated_at
+      FROM categories
+      WHERE id_user = ?
+      ORDER BY id_category DESC
+    `;
 
-        db.query(sql, [data.user_id, data.name], callback);
-    },
+    db.query(sql, [id_user], callback);
+  },
 
+  getById: (id_user, id_category, callback) => {
+    const sql = `
+      SELECT 
+        id_category,
+        id_user,
+        name,
+        type,
+        created_at,
+        updated_at
+      FROM categories
+      WHERE id_category = ?
+        AND id_user = ?
+    `;
 
-    // GET ALL CATEGORY
-    getAll: (callback) => {
+    db.query(sql, [id_category, id_user], callback);
+  },
 
-        const sql = `
-            SELECT * FROM categories
-        `;
+  update: (id_user, id_category, data, callback) => {
+    const sql = `
+      UPDATE categories
+      SET name = ?, type = ?
+      WHERE id_category = ?
+        AND id_user = ?
+    `;
 
-        db.query(sql, callback);
-    },
+    db.query(
+      sql,
+      [data.name, data.type, id_category, id_user],
+      callback
+    );
+  },
 
+  delete: (id_user, id_category, callback) => {
+    const sql = `
+      DELETE FROM categories
+      WHERE id_category = ?
+        AND id_user = ?
+    `;
 
-    // GET CATEGORY BY ID
-    getById: (id, callback) => {
-
-        const sql = `
-            SELECT * FROM categories
-            WHERE id = ?
-        `;
-
-        db.query(sql, [id], callback);
-    },
-
-
-    // UPDATE CATEGORY
-    update: (id, data, callback) => {
-
-        const sql = `
-            UPDATE categories
-            SET name = ?
-            WHERE id = ?
-        `;
-
-        db.query(sql, [data.name, id], callback);
-    },
-
-
-    // DELETE CATEGORY
-    delete: (id, callback) => {
-
-        const sql = `
-            DELETE FROM categories
-            WHERE id = ?
-        `;
-
-        db.query(sql, [id], callback);
-    }
-
+    db.query(sql, [id_category, id_user], callback);
+  },
 };
 
 module.exports = Category;

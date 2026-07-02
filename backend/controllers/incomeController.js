@@ -1,302 +1,257 @@
-const db = require('../config/database');
+const Income = require("../models/incomeModel");
+
+const getUserId = (req) => {
+  return req.user?.id_user || req.user?.id;
+};
 
 const addIncome = (req, res) => {
+  const id_user = getUserId(req);
 
-    const {
-        amount,
-        id_category,
-        description
-    } = req.body;
+  const {
+    amount,
+    id_category,
+    transaction_date,
+    description,
+  } = req.body;
 
-    const id_user = req.user?.id;
+  if (!id_user) {
+    return res.status(401).json({
+      message: "User tidak terdeteksi. Silakan login ulang.",
+    });
+  }
 
-    if (!amount || !id_category) {
+  if (!amount || Number(amount) <= 0) {
+    return res.status(400).json({
+      message: "Amount wajib diisi dan harus lebih dari 0.",
+    });
+  }
 
-        return res.status(400).json({
-            message: "Amount dan kategori wajib diisi"
+  if (!id_category) {
+    return res.status(400).json({
+      message: "Kategori wajib dipilih.",
+    });
+  }
+
+  Income.create(
+    {
+      id_user,
+      id_category,
+      amount,
+      transaction_date,
+      description,
+    },
+    (err, result) => {
+      if (err) {
+        console.error("ERROR ADD INCOME:", err);
+
+        return res.status(500).json({
+          message: "Gagal menambahkan income",
+          error: err.message,
         });
+      }
+
+      res.status(201).json({
+        message: "Income berhasil ditambahkan",
+        data: {
+          id_transaction: result.insertId,
+          id_user,
+          id_category,
+          amount,
+          transaction_date,
+          description,
+        },
+      });
     }
-
-    if (!id_user) {
-
-        return res.status(401).json({
-            message: "User tidak terdeteksi, login dulu"
-        });
-    }
-
-    const query = `
-        INSERT INTO transactions
-        (
-            id_user,
-            id_category,
-            amount,
-            transaction_date,
-            description
-        )
-        VALUES (?, ?, ?, NOW(), ?)
-    `;
-
-    db.query(
-        query,
-        [
-            id_user,
-            id_category,
-            amount,
-            description || null
-        ],
-        (err, result) => {
-
-            if (err) {
-
-                console.error("ERROR ADD INCOME:", err);
-
-                return res.status(500).json({
-                    message: "Gagal menambahkan income",
-                    error: err.message
-                });
-            }
-
-            res.status(201).json({
-                message: "Income berhasil ditambahkan",
-                data: {
-                    id_transaction: result.insertId,
-                    id_user,
-                    id_category,
-                    amount,
-                    description
-                }
-            });
-        }
-    );
+  );
 };
 
 const getAllIncome = (req, res) => {
+  const id_user = getUserId(req);
 
-    const id_user = req.user?.id;
-
-    const query = `
-        SELECT 
-            t.*,
-            c.name AS category_name,
-            c.type
-        FROM transactions t
-        LEFT JOIN categories c
-            ON t.id_category = c.id_category
-        WHERE t.id_user = ?
-        AND c.type = 'Income'
-        ORDER BY t.transaction_date DESC
-    `;
-
-    db.query(query, [id_user], (err, results) => {
-
-        if (err) {
-
-            console.error("ERROR GET INCOME:", err);
-
-            return res.status(500).json({
-                message: "Gagal mengambil data income",
-                error: err.message
-            });
-        }
-
-        res.status(200).json(results);
+  if (!id_user) {
+    return res.status(401).json({
+      message: "User tidak terdeteksi. Silakan login ulang.",
     });
+  }
+
+  Income.getAllByUser(id_user, (err, results) => {
+    if (err) {
+      console.error("ERROR GET INCOME:", err);
+
+      return res.status(500).json({
+        message: "Gagal mengambil data income",
+        error: err.message,
+      });
+    }
+
+    res.status(200).json({
+      message: "Data income berhasil diambil",
+      data: results,
+    });
+  });
 };
 
 const getIncomeById = (req, res) => {
+  const id_user = getUserId(req);
+  const { id } = req.params;
 
-    const { id } = req.params;
+  Income.getById(id_user, id, (err, results) => {
+    if (err) {
+      console.error("ERROR GET INCOME BY ID:", err);
 
-    const query = `
-        SELECT 
-            t.*,
-            c.name AS category_name,
-            c.type
-        FROM transactions t
-        LEFT JOIN categories c
-            ON t.id_category = c.id_category
-        WHERE t.id_transaction = ?
-        AND c.type = 'Income'
-    `;
+      return res.status(500).json({
+        message: "Gagal mengambil detail income",
+        error: err.message,
+      });
+    }
 
-    db.query(query, [id], (err, results) => {
+    if (results.length === 0) {
+      return res.status(404).json({
+        message: "Income tidak ditemukan",
+      });
+    }
 
-        if (err) {
-
-            console.error("ERROR GET BY ID:", err);
-
-            return res.status(500).json({
-                message: "Gagal mengambil data income",
-                error: err.message
-            });
-        }
-
-        if (results.length === 0) {
-
-            return res.status(404).json({
-                message: "Income tidak ditemukan"
-            });
-        }
-
-        res.status(200).json(results[0]);
+    res.status(200).json({
+      message: "Detail income berhasil diambil",
+      data: results[0],
     });
+  });
 };
 
 const updateIncome = (req, res) => {
+  const id_user = getUserId(req);
+  const { id } = req.params;
 
-    const { id } = req.params;
+  const {
+    amount,
+    id_category,
+    transaction_date,
+    description,
+  } = req.body;
 
-    const {
-        amount,
-        id_category,
-        description
-    } = req.body;
+  if (!amount || Number(amount) <= 0) {
+    return res.status(400).json({
+      message: "Amount wajib diisi dan harus lebih dari 0.",
+    });
+  }
 
-    const query = `
-        UPDATE transactions
-        SET
-            amount = ?,
-            id_category = ?,
-            description = ?
-        WHERE id_transaction = ?
-    `;
+  if (!id_category) {
+    return res.status(400).json({
+      message: "Kategori wajib dipilih.",
+    });
+  }
 
-    db.query(
-        query,
-        [
-            amount,
-            id_category,
-            description,
-            id
-        ],
-        (err, result) => {
+  Income.update(
+    id_user,
+    id,
+    {
+      amount,
+      id_category,
+      transaction_date,
+      description,
+    },
+    (err, result) => {
+      if (err) {
+        console.error("ERROR UPDATE INCOME:", err);
 
-            if (err) {
+        return res.status(500).json({
+          message: "Gagal update income",
+          error: err.message,
+        });
+      }
 
-                console.error("ERROR UPDATE:", err);
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          message: "Income tidak ditemukan atau bukan milik user ini.",
+        });
+      }
 
-                return res.status(500).json({
-                    message: "Gagal update income",
-                    error: err.message
-                });
-            }
-
-            res.status(200).json({
-                message: "Income berhasil diupdate"
-            });
-        }
-    );
+      res.status(200).json({
+        message: "Income berhasil diupdate",
+      });
+    }
+  );
 };
 
 const deleteIncome = (req, res) => {
+  const id_user = getUserId(req);
+  const { id } = req.params;
 
-    const { id } = req.params;
+  Income.delete(id_user, id, (err, result) => {
+    if (err) {
+      console.error("ERROR DELETE INCOME:", err);
 
-    const query = `
-        DELETE FROM transactions
-        WHERE id_transaction = ?
-    `;
+      return res.status(500).json({
+        message: "Gagal hapus income",
+        error: err.message,
+      });
+    }
 
-    db.query(query, [id], (err, result) => {
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "Income tidak ditemukan atau bukan milik user ini.",
+      });
+    }
 
-        if (err) {
-
-            console.error("ERROR DELETE:", err);
-
-            return res.status(500).json({
-                message: "Gagal hapus income",
-                error: err.message
-            });
-        }
-
-        res.status(200).json({
-            message: "Income berhasil dihapus"
-        });
+    res.status(200).json({
+      message: "Income berhasil dihapus",
     });
+  });
 };
 
 const filterIncomeByDate = (req, res) => {
+  const id_user = getUserId(req);
+  const { start, end } = req.query;
 
-    const {
-        start,
-        end
-    } = req.query;
+  if (!start || !end) {
+    return res.status(400).json({
+      message: "Query start dan end wajib diisi.",
+    });
+  }
 
-    const id_user = req.user?.id;
+  Income.filterByDate(id_user, start, end, (err, results) => {
+    if (err) {
+      console.error("ERROR FILTER INCOME:", err);
 
-    const query = `
-        SELECT 
-            t.*,
-            c.name AS category_name,
-            c.type
-        FROM transactions t
-        LEFT JOIN categories c
-            ON t.id_category = c.id_category
-        WHERE t.id_user = ?
-        AND c.type = 'Income'
-        AND t.transaction_date BETWEEN ? AND ?
-    `;
+      return res.status(500).json({
+        message: "Gagal filter income",
+        error: err.message,
+      });
+    }
 
-    db.query(
-        query,
-        [
-            id_user,
-            start,
-            end
-        ],
-        (err, results) => {
-
-            if (err) {
-
-                console.error("ERROR FILTER:", err);
-
-                return res.status(500).json({
-                    message: "Gagal filter income",
-                    error: err.message
-                });
-            }
-
-            res.status(200).json(results);
-        }
-    );
+    res.status(200).json({
+      message: "Filter income berhasil",
+      data: results,
+    });
+  });
 };
 
 const getTotalIncome = (req, res) => {
+  const id_user = getUserId(req);
 
-    const id_user = req.user?.id;
+  Income.getTotalByUser(id_user, (err, results) => {
+    if (err) {
+      console.error("ERROR TOTAL INCOME:", err);
 
-    const query = `
-        SELECT 
-            SUM(t.amount) AS total_income
-        FROM transactions t
-        LEFT JOIN categories c
-            ON t.id_category = c.id_category
-        WHERE t.id_user = ?
-        AND c.type = 'Income'
-    `;
+      return res.status(500).json({
+        message: "Gagal mengambil total income",
+        error: err.message,
+      });
+    }
 
-    db.query(query, [id_user], (err, results) => {
-
-        if (err) {
-
-            console.error("ERROR TOTAL:", err);
-
-            return res.status(500).json({
-                message: "Gagal mengambil total income",
-                error: err.message
-            });
-        }
-
-        res.status(200).json(results[0]);
+    res.status(200).json({
+      message: "Total income berhasil diambil",
+      data: results[0],
     });
+  });
 };
 
 module.exports = {
-    addIncome,
-    getAllIncome,
-    getIncomeById,
-    updateIncome,
-    deleteIncome,
-    filterIncomeByDate,
-    getTotalIncome
+  addIncome,
+  getAllIncome,
+  getIncomeById,
+  updateIncome,
+  deleteIncome,
+  filterIncomeByDate,
+  getTotalIncome,
 };

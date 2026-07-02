@@ -1,35 +1,61 @@
 import { useState, useEffect, useRef } from "react";
-import { getProfile, uploadProfilePicture } from "../../services/profileService";
+import { useNavigate } from "react-router-dom";
+import {
+  getProfile,
+  uploadProfilePicture,
+} from "../../services/profileService";
 import "./Profile.css";
 
 function Profile() {
+  const navigate = useNavigate();
+
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
+
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await getProfile();
-        console.log("Data dari backend:", data);
-        
-        if (data && data.data) {
-          setProfile(data.data);
-        } else if (data) {
-          setProfile(data);
-        } else {
-          setErrorMessage("Data profil kosong atau tidak ditemukan.");
-        }
-      } catch (err) {
-        console.error("Gagal memuat profil:", err);
-        setErrorMessage("Gagal tersambung ke server atau session kamu habis.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchProfile();
   }, []);
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      setErrorMessage(null);
+
+      const data = await getProfile();
+
+      if (data && data.data) {
+        setProfile(data.data);
+      } else if (data) {
+        setProfile(data);
+      } else {
+        setErrorMessage("Data profil kosong atau tidak ditemukan.");
+      }
+    } catch (err) {
+      console.error("Gagal memuat profil:", err);
+
+      if (err.response?.status === 404) {
+        setErrorMessage(
+          err.response?.data?.message ||
+          "Endpoint profile tidak ditemukan. Cek route backend /api/manajemen-users/profile."
+        );
+      } else if (err.response?.status === 401) {
+        setErrorMessage(
+          err.response?.data?.message ||
+          "Sesi kamu habis atau token tidak valid. Silakan login ulang."
+        );
+      } else {
+        setErrorMessage(
+          err.response?.data?.message ||
+          "Gagal tersambung ke server."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleImageClick = () => {
     if (fileInputRef.current) {
@@ -39,27 +65,43 @@ function Profile() {
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
+
     if (!file) return;
 
-    const maxSizeInBytes = 2 * 1024 * 1024; 
+    const maxSizeInBytes = 2 * 1024 * 1024;
+
     if (file.size > maxSizeInBytes) {
-      alert("⚠️ Gagal mengunggah! Ukuran foto terlalu besar. Maksimal 2MB.");
+      alert("⚠️ Ukuran foto terlalu besar. Maksimal 2MB.");
       return;
     }
 
     const formData = new FormData();
+
     formData.append("profile_picture", file);
-    formData.append("username", profile?.username || "cinta");
-    formData.append("email", profile?.email || "cinta@gmail.com");
+    formData.append("username", profile?.username || "");
+    formData.append("email", profile?.email || "");
+
+    if (profile?.password) {
+      formData.append("password", profile.password);
+    }
 
     try {
       alert("Sedang mengunggah foto... ⏳");
+
       await uploadProfilePicture(formData);
+
       alert("Foto profil berhasil diperbarui! 🎉");
-      window.location.reload(); 
+
+      fetchProfile();
     } catch (err) {
-      console.error("Gagal mengunggah gambar:", err);
-      alert("Gagal mengunggah foto! Server menolak permintaan (Error 400/500).");
+      console.error("Gagal mengunggah foto:", err);
+      console.log("STATUS:", err.response?.status);
+      console.log("DATA ERROR:", err.response?.data);
+
+      alert(
+        err.response?.data?.message ||
+        "Gagal mengunggah foto. Cek koneksi server atau format file."
+      );
     }
   };
 
@@ -78,96 +120,163 @@ function Profile() {
     return (
       <div className="bento-wrapper-page">
         <div className="profile-error-box">
-          <h2>⚠️ Sesi Berakhir</h2>
+          <h2>⚠️ Profile Tidak Dapat Dimuat</h2>
+
           <p>{errorMessage}</p>
-          <span className="error-hint">Silakan lakukan Login ulang pada menu utama CuppyCash.</span>
+
+          <span className="error-hint">
+            Coba login ulang atau cek route backend profile.
+          </span>
+
+          <br />
+          <br />
+
+          <button
+            className="primary-button"
+            onClick={() => {
+              localStorage.removeItem("token");
+              localStorage.removeItem("username");
+              navigate("/login");
+            }}
+          >
+            Login Ulang
+          </button>
         </div>
       </div>
     );
   }
 
-  const base_url = "http://localhost:3000/uploads/";
-  const imageSrc = profile?.profile_picture 
-    ? (profile.profile_picture.startsWith("http") ? profile.profile_picture : `${base_url}${profile.profile_picture}`)
+  const baseUrl = "http://localhost:3000/uploads/";
+
+  const profilePhoto =
+    profile?.profile_picture || profile?.foto_profil;
+
+  const imageSrc = profilePhoto
+    ? profilePhoto.startsWith("http")
+      ? profilePhoto
+      : `${baseUrl}${profilePhoto}`
     : "https://i.pravatar.cc/300";
 
   return (
     <div className="bento-wrapper-page">
-      {/* Teks sambutan dinamis atas */}
       <div className="profile-welcome-header">
-        <h1>Halo, {profile?.username || "Cinta Melati"}! ✨</h1>
-        <p>Ini adalah rangkuman performa akun dan pengaturan finansial pribadimu bulan ini.</p>
+        <h1>
+          Halo, {profile?.username || "User"}! ✨
+        </h1>
+
+        <p>
+          Ini adalah rangkuman performa akun dan pengaturan finansial
+          pribadimu bulan ini.
+        </p>
       </div>
 
       <div className="bento-profile-container">
-        
-        {/* CARD 1: Hero Card Kiri (Kunci Utama Visual) */}
-        <div className="bento-card card-hero" onClick={handleImageClick} title="Klik untuk ubah foto profil">
+        <div
+          className="bento-card card-hero"
+          onClick={handleImageClick}
+          title="Klik untuk ubah foto profil"
+        >
           <div className="card-glare"></div>
-          
-          {/* Tombol Input File Rahasia (Sekarang Sudah Ada & Siap Dipicu) */}
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            accept="image/*" 
-            style={{ display: "none" }} 
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            style={{ display: "none" }}
           />
 
           <div className="bento-avatar-wrapper">
             <img src={imageSrc} alt="Profile" />
+
             <div className="avatar-overlay">
               <span>GANTI FOTO</span>
             </div>
           </div>
-          <h2>{profile?.username || "Cinta Melati"}</h2>
-          <p className="bento-hero-email">{profile?.email || "cinta1@gmail.com"}</p>
-          <span className="bento-badge-premium">👑 Premium Member</span>
+
+          <h2>{profile?.username || "User"}</h2>
+
+          <p className="bento-hero-email">
+            {profile?.email || "email belum tersedia"}
+          </p>
+
+          <span className="bento-badge-premium">
+            👑 Premium Member
+          </span>
         </div>
 
-        {/* CARD 2: About Me (Gaya Quote Mewah) */}
         <div className="bento-card card-about">
           <div className="bento-card-icon-top">✨</div>
+
           <h3>Bio & Pengembang</h3>
-          <p>"{profile?.bio || "Mahasiswa Teknik Informatika yang sedang belajar Fullstack Developer 🚀"}"</p>
-          <div className="card-badge-footer">CuppyCash Team</div>
+
+          <p>
+            "
+            {profile?.bio ||
+              "Mahasiswa Teknik Informatika yang sedang belajar Fullstack Developer 🚀"}
+            "
+          </p>
+
+          <div className="card-badge-footer">
+            CuppyCash Team
+          </div>
         </div>
 
-        {/* CARD 3: Stats Saving (Warna Gradasi Soft Pink) */}
         <div className="bento-card card-stat card-pink-glow">
           <div className="stat-header">
             <span className="stat-icon-box">📈</span>
+
             <p className="stat-label">Saving Rate</p>
           </div>
-          <h2 className="stat-value">89%</h2>
+
+          <h2 className="stat-value">
+            {profile?.saving_rate || 0}%
+          </h2>
           <div className="stat-progress-bar-mini">
-            <div className="stat-fill-mini" style={{width: "89%"}}></div>
+            <div
+              className="stat-fill-mini"
+              style={{ width: `${profile?.saving_rate || 0}%` }}
+            ></div>
           </div>
-          <span className="stat-desc">🎯 Menuju target kebebasan finansial!</span>
+
+          <span className="stat-desc">
+            🎯 Menuju target kebebasan finansial!
+          </span>
         </div>
 
-        {/* CARD 4: Stats Budget (Bersih & Elegan) */}
         <div className="bento-card card-stat card-maroon-glow">
           <div className="stat-header">
             <span className="stat-icon-box">💰</span>
+
             <p className="stat-label">Active Budget</p>
           </div>
-          <h2 className="stat-value">12</h2>
-          <span className="stat-desc">Alokasi anggaran belanja aktif.</span>
+
+          <h2 className="stat-value">
+            {profile?.active_budget || 0}
+          </h2>
+
+          <span className="stat-desc">
+            Alokasi anggaran belanja aktif.
+          </span>
         </div>
 
-        {/* CARD 5: Stats Category (Lebar penuh di baris baru untuk menutup grid dengan cantik) */}
         <div className="bento-card card-stat card-full-width">
           <div className="card-flex-row">
             <div className="stat-icon-box large">🗂️</div>
+
             <div className="stat-text-side">
               <p className="stat-label">Kategori Dompet</p>
-              <h2 className="stat-value">5 Pos Dana</h2>
-              <span className="stat-desc">Makanan, Kosan, Kuliah, Hiburan, Tabungan</span>
+
+              <h2 className="stat-value">
+                {profile?.category_count || 0} Pos Dana
+              </h2>
+
+              <span className="stat-desc">
+               {profile?.category_names || "Belum ada kategori"}
+              </span>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -4,7 +4,24 @@ import styles from "./Navbar.module.css";
 
 function Navbar() {
   const navigate = useNavigate();
+
   const token = localStorage.getItem("token");
+
+  const getRoleFromToken = () => {
+    try {
+      const savedToken = localStorage.getItem("token");
+
+      if (!savedToken) return null;
+
+      const payload = JSON.parse(atob(savedToken.split(".")[1]));
+
+      return payload.role || null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const role = localStorage.getItem("role") || getRoleFromToken();
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -12,6 +29,8 @@ function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
+    localStorage.removeItem("role");
+
     navigate("/login");
     window.location.reload();
   };
@@ -21,7 +40,7 @@ function Navbar() {
   };
 
   const menuItems = [
-    { to: "/", label: "Dashboard", icon: "D" },
+    { to: "/dashboard", label: "Dashboard", icon: "D" },
     { to: "/income", label: "Income", icon: "I" },
     { to: "/expenses", label: "Expense", icon: "E" },
     { to: "/charts", label: "Chart", icon: "C" },
@@ -29,6 +48,17 @@ function Navbar() {
     { to: "/budget", label: "Budget", icon: "B" },
     { to: "/history", label: "History", icon: "H" },
     { to: "/saving-goals", label: "Saving Goals", icon: "S" },
+
+    ...(role === "Admin"
+      ? [
+          {
+            to: "/admin/users",
+            label: "Admin Users",
+            icon: "A",
+          },
+        ]
+      : []),
+
     { to: "/profile", label: "Profile", icon: "P" },
   ];
 
@@ -43,7 +73,7 @@ function Navbar() {
         </button>
 
         <div className={styles.mobileBrand}>
-          <img src="/logo-cuppycash.jpeg" alt="CuppyCash" />
+          <img src="/logo-cuppycash.svg" alt="CuppyCash" />
           <span>CuppyCash</span>
         </div>
       </header>
@@ -64,7 +94,7 @@ function Navbar() {
       >
         <div className={styles.brandArea}>
           <div className={styles.logoWrap}>
-            <img src="/logo-cuppycash.jpeg" alt="CuppyCash Logo" />
+            <img src="/logo-cuppycash.svg" alt="CuppyCash Logo" />
           </div>
 
           <div className={styles.brandText}>

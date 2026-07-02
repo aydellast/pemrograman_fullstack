@@ -13,240 +13,435 @@ import api from "../../services/api";
 import styles from "./Dashboard.module.css";
 
 function Dashboard() {
-  const username = localStorage.getItem("username") || "User";
+  const defaultUsername = localStorage.getItem("username") || "User";
+  const defaultProfileImage = "/cuppycash-logo.svg";
+
+  const [profileInfo, setProfileInfo] = useState({
+    username: defaultUsername,
+    photo: defaultProfileImage,
+  });
 
   const [summary, setSummary] = useState({
-    totalBalance: 6500000,
-    totalIncome: 19500000,
-    totalExpense: 13000000,
-    totalSaving: 4000000,
+    totalBalance: 0,
+    totalIncome: 0,
+    totalExpense: 0,
+    totalSaving: 0,
+    totalTransaction: 0,
   });
 
-  const [chartData, setChartData] = useState([
-    { month: "Jan", income: 4000000, expense: 2500000 },
-    { month: "Feb", income: 5000000, expense: 3000000 },
-    { month: "Mar", income: 4500000, expense: 3500000 },
-    { month: "Apr", income: 6000000, expense: 4000000 },
-  ]);
+  const [chartData, setChartData] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [savingGoal, setSavingGoal] = useState(null);
 
-  const [activities, setActivities] = useState([
-    {
-      id: 1,
-      title: "Beli Bahan Dimsum",
-      category: "Operasional",
-      amount: 150000,
-      type: "Expense",
-    },
-    {
-      id: 2,
-      title: "Gas Elpiji 3kg",
-      category: "Dapur",
-      amount: 22000,
-      type: "Expense",
-    },
-    {
-      id: 3,
-      title: "Gaji Bulanan",
-      category: "Gaji",
-      amount: 5000000,
-      type: "Income",
-    },
-  ]);
-
-  const [savingGoal, setSavingGoal] = useState({
-    goal_name: "Laptop Gaming",
-    target_amount: 10000000,
-    current_amount: 4000000,
-  });
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     fetchDashboardData();
+    fetchProfileData();
   }, []);
 
-  const fetchDashboardData = async () => {
+  const formatRupiah = (value) => {
+    return `Rp ${Number(value || 0).toLocaleString("id-ID")}`;
+  };
+
+  const formatCompact = (value) => {
+    return Number(value || 0).toLocaleString("id-ID", {
+      notation: "compact",
+      compactDisplay: "short",
+    });
+  };
+
+  const normalizeProfilePhoto = (photo) => {
+    if (!photo || typeof photo !== "string") {
+      return defaultProfileImage;
+    }
+
+    if (photo.startsWith("http")) {
+      return photo;
+    }
+
+    if (photo.startsWith("/uploads/")) {
+      return `http://localhost:3000${photo}`;
+    }
+
+    if (photo.startsWith("uploads/")) {
+      return `http://localhost:3000/${photo}`;
+    }
+
+    return `http://localhost:3000/uploads/${photo}`;
+  };
+
+  const fetchProfileData = async () => {
     try {
-      const response = await api.get("/dashboard");
+      const response = await api.get("/manajemen-users/profile");
 
-      if (response.data?.summary) {
-        setSummary(response.data.summary);
-      }
+      const profile = response.data?.data || response.data || {};
 
-      if (response.data?.chartData) {
-        setChartData(response.data.chartData);
-      }
+      const username =
+        profile.username ||
+        profile.name ||
+        localStorage.getItem("username") ||
+        "User";
 
-      if (response.data?.activities) {
-        setActivities(response.data.activities);
-      }
+      const rawPhoto =
+        profile.profile_picture ||
+        profile.foto_profil ||
+        profile.profilePicture ||
+        "";
 
-      if (response.data?.savingGoal) {
-        setSavingGoal(response.data.savingGoal);
-      }
+      const photo = normalizeProfilePhoto(rawPhoto);
+
+      setProfileInfo({
+        username,
+        photo,
+      });
+
+      localStorage.setItem("username", username);
     } catch (error) {
-      console.log("Dashboard memakai data sementara:", error.message);
+      console.log("Gagal mengambil data profile:", error.message);
+
+      setProfileInfo({
+        username: defaultUsername,
+        photo: defaultProfileImage,
+      });
     }
   };
 
-  const savingProgress = Math.round(
-    (Number(savingGoal.current_amount) / Number(savingGoal.target_amount)) * 100
-  );
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setErrorMessage("");
+
+      const response = await api.get("/dashboard");
+
+      setSummary(
+        response.data?.summary || {
+          totalBalance: 0,
+          totalIncome: 0,
+          totalExpense: 0,
+          totalSaving: 0,
+          totalTransaction: 0,
+        }
+      );
+
+      setChartData(
+        Array.isArray(response.data?.chartData)
+          ? response.data.chartData
+          : []
+      );
+
+      setActivities(
+        Array.isArray(response.data?.activities)
+          ? response.data.activities
+          : []
+      );
+
+      setSavingGoal(response.data?.savingGoal || null);
+    } catch (error) {
+      console.error("Gagal mengambil dashboard:", error);
+
+      setErrorMessage(
+        error.response?.data?.message ||
+          "Gagal mengambil data dashboard dari server."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchDashboardData();
+    fetchProfileData();
+  };
+
+  const savingProgress = savingGoal
+    ? Math.round(
+        (Number(savingGoal.current_amount || 0) /
+          Number(savingGoal.target_amount || 1)) *
+          100
+      )
+    : 0;
 
   return (
     <section className={styles.dashboard}>
       <div className={styles.topbar}>
         <div>
-          <h1>Welcome Back, {username}</h1>
+          <p className={styles.eyebrow}>CuppyCash Overview</p>
+
+          <h1>Welcome Back, {profileInfo.username}</h1>
+
           <p>Here is your financial summary today.</p>
         </div>
 
-        <div className={styles.searchBox}>
-          <input type="text" placeholder="Search transactions..." />
-        </div>
+        <button className={styles.refreshBtn} onClick={handleRefresh}>
+          Refresh Data
+        </button>
 
         <div className={styles.userBadge}>
-          <img src="/logo-cuppycash.jpeg" alt="User" />
-          <span>{username}</span>
+          <img
+            src={profileInfo.photo}
+            alt=""
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = defaultProfileImage;
+            }}
+          />
+
+          <span>{profileInfo.username}</span>
         </div>
       </div>
 
-      <div className={styles.dashboardGrid}>
-        <main className={styles.mainContent}>
-          <div className={styles.cardsGrid}>
-            <SummaryCard
-              title="Total Balance"
-              amount={summary.totalBalance}
-              icon="💼"
-              variant="teal"
-            />
+      {loading && (
+        <div className={styles.stateBox}>
+          Memuat dashboard...
+        </div>
+      )}
 
-            <SummaryCard
-              title="Total Expense"
-              amount={summary.totalExpense}
-              icon="🧾"
-              variant="pink"
-            />
+      {errorMessage && !loading && (
+        <div className={styles.errorBox}>
+          {errorMessage}
+        </div>
+      )}
 
-            <SummaryCard
-              title="Total Savings"
-              amount={summary.totalSaving}
-              icon="🎯"
-              variant="purple"
-            />
-          </div>
+      {!loading && (
+        <div className={styles.dashboardGrid}>
+          <main className={styles.mainContent}>
+            <div className={styles.cardsGrid}>
+              <SummaryCard
+                title="Total Balance"
+                amount={summary.totalBalance}
+                icon="💼"
+                variant="teal"
+              />
 
-          <div className={styles.chartCard}>
-            <div className={styles.sectionHeader}>
-              <div>
-                <h2>Income vs Expense</h2>
-                <p>Monthly financial movement</p>
+              <SummaryCard
+                title="Total Income"
+                amount={summary.totalIncome}
+                icon="💰"
+                variant="green"
+              />
+
+              <SummaryCard
+                title="Total Expense"
+                amount={summary.totalExpense}
+                icon="🧾"
+                variant="pink"
+              />
+
+              <SummaryCard
+                title="Total Savings"
+                amount={summary.totalSaving}
+                icon="🎯"
+                variant="purple"
+              />
+            </div>
+
+            <div className={styles.chartCard}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2>Income vs Expense</h2>
+                  <p>Monthly financial movement from your transactions.</p>
+                </div>
+
+                <Link to="/charts">View detail</Link>
               </div>
 
-              <Link to="/charts">View detail</Link>
+              {chartData.length === 0 ? (
+                <div className={styles.emptyBox}>
+                  Belum ada data transaksi untuk grafik.
+                </div>
+              ) : (
+                <div className={styles.chartWrap}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                      <defs>
+                        <linearGradient
+                          id="incomeGradientDashboard"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#18d4bd"
+                            stopOpacity={0.55}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#18d4bd"
+                            stopOpacity={0.04}
+                          />
+                        </linearGradient>
+
+                        <linearGradient
+                          id="expenseGradientDashboard"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#ff71a8"
+                            stopOpacity={0.55}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#ff71a8"
+                            stopOpacity={0.04}
+                          />
+                        </linearGradient>
+                      </defs>
+
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f2d4df" />
+
+                      <XAxis
+                        dataKey="month"
+                        stroke="#9b7a89"
+                        tickLine={false}
+                        axisLine={false}
+                      />
+
+                      <YAxis
+                        stroke="#9b7a89"
+                        tickFormatter={formatCompact}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+
+                      <Tooltip formatter={(value) => formatRupiah(value)} />
+
+                      <Area
+                        type="monotone"
+                        dataKey="income"
+                        stroke="#10b5a5"
+                        fill="url(#incomeGradientDashboard)"
+                        strokeWidth={3}
+                        name="Income"
+                      />
+
+                      <Area
+                        type="monotone"
+                        dataKey="expense"
+                        stroke="#ff4f9a"
+                        fill="url(#expenseGradientDashboard)"
+                        strokeWidth={3}
+                        name="Expense"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </div>
+          </main>
 
-            <div className={styles.chartWrap}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="incomePink" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ff5fa2" stopOpacity={0.55} />
-                      <stop offset="95%" stopColor="#ff5fa2" stopOpacity={0.04} />
-                    </linearGradient>
-                  </defs>
+          <aside className={styles.sidePanel}>
+            <div className={styles.panelCard}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2>Recent Activities</h2>
+                  <p>Latest transactions</p>
+                </div>
 
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f2d4df" />
-                  <XAxis dataKey="month" stroke="#9b7a89" />
-                  <YAxis stroke="#9b7a89" />
-
-                  <Tooltip
-                    formatter={(value) =>
-                      `Rp ${Number(value).toLocaleString("id-ID")}`
-                    }
-                  />
-
-                  <Area
-                    type="monotone"
-                    dataKey="income"
-                    stroke="#ff4f9a"
-                    fill="url(#incomePink)"
-                    strokeWidth={3}
-                    name="Income"
-                  />
-
-                  <Area
-                    type="monotone"
-                    dataKey="expense"
-                    stroke="#b35cff"
-                    fill="#f1d9ff"
-                    strokeWidth={3}
-                    name="Expense"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </main>
-
-        <aside className={styles.sidePanel}>
-          <div className={styles.panelCard}>
-            <div className={styles.sectionHeader}>
-              <div>
-                <h2>Recent Activities</h2>
-                <p>Latest transactions</p>
+                <Link to="/history">View all</Link>
               </div>
+
+              {activities.length === 0 ? (
+                <div className={styles.emptyMini}>
+                  Belum ada transaksi terbaru.
+                </div>
+              ) : (
+                <div className={styles.activityList}>
+                  {activities.slice(0, 5).map((item) => (
+                    <div key={item.id} className={styles.activityItem}>
+                      <span
+                        className={
+                          item.type === "Income"
+                            ? styles.activityIconIncome
+                            : styles.activityIconExpense
+                        }
+                      >
+                        {item.type === "Income" ? "+" : "−"}
+                      </span>
+
+                      <div>
+                        <h4>{item.title || item.category}</h4>
+
+                        <p>
+                          {item.category} •{" "}
+                          {item.transaction_date
+                            ? String(item.transaction_date).slice(0, 10)
+                            : "-"}
+                        </p>
+                      </div>
+
+                      <strong>{formatRupiah(item.amount)}</strong>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <div className={styles.activityList}>
-              {activities.slice(0, 5).map((item) => (
-                <div key={item.id} className={styles.activityItem}>
-                  <span
-                    className={
-                      item.type === "Income"
-                        ? styles.activityIconIncome
-                        : styles.activityIconExpense
-                    }
-                  >
-                    {item.type === "Income" ? "+" : "−"}
-                  </span>
+            <div className={styles.panelCard}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2>Saving Goal</h2>
+                  <p>Latest target progress</p>
+                </div>
+              </div>
 
-                  <div>
-                    <h4>{item.title}</h4>
-                    <p>{item.category}</p>
+              {!savingGoal ? (
+                <div className={styles.emptyMini}>
+                  Belum ada saving goal.
+
+                  <Link to="/saving-goals" className={styles.smallButton}>
+                    Create Goal
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  <p className={styles.goalName}>{savingGoal.goal_name}</p>
+
+                  <div className={styles.progressInfo}>
+                    <span>{formatRupiah(savingGoal.current_amount)}</span>
+                    <span>{formatRupiah(savingGoal.target_amount)}</span>
                   </div>
 
-                  <strong>
-                    Rp {Number(item.amount).toLocaleString("id-ID")}
-                  </strong>
-                </div>
-              ))}
+                  <div className={styles.progressBar}>
+                    <div
+                      style={{
+                        width: `${Math.min(savingProgress, 100)}%`,
+                      }}
+                    />
+                  </div>
+
+                  <p className={styles.progressText}>
+                    {Math.min(savingProgress, 100)}% tercapai
+                  </p>
+
+                  <Link to="/saving-goals" className={styles.smallButton}>
+                    Manage Goal
+                  </Link>
+                </>
+              )}
             </div>
-          </div>
 
-          <div className={styles.panelCard}>
-            <h2>Saving Goal</h2>
-            <p className={styles.goalName}>{savingGoal.goal_name}</p>
+            <div className={styles.panelCard}>
+              <h2>Total Transaction</h2>
 
-            <div className={styles.progressInfo}>
-              <span>
-                Rp {Number(savingGoal.current_amount).toLocaleString("id-ID")}
+              <p className={styles.bigNumber}>
+                {summary.totalTransaction}
+              </p>
+
+              <span className={styles.mutedText}>
+                Semua transaksi pada akun ini.
               </span>
-              <span>
-                Rp {Number(savingGoal.target_amount).toLocaleString("id-ID")}
-              </span>
             </div>
-
-            <div className={styles.progressBar}>
-              <div style={{ width: `${savingProgress}%` }} />
-            </div>
-
-            <p className={styles.progressText}>{savingProgress}% tercapai</p>
-
-            <Link to="/saving-goals" className={styles.smallButton}>
-              Manage Goal
-            </Link>
-          </div>
-        </aside>
-      </div>
+          </aside>
+        </div>
+      )}
     </section>
   );
 }
@@ -259,7 +454,8 @@ function SummaryCard({ title, amount, icon, variant }) {
       </div>
 
       <p>{title}</p>
-      <h2>Rp {Number(amount).toLocaleString("id-ID")}</h2>
+
+      <h2>Rp {Number(amount || 0).toLocaleString("id-ID")}</h2>
     </div>
   );
 }

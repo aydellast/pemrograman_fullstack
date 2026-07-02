@@ -1,45 +1,89 @@
-const db = require('../config/database');
+const db = require("../config/database");
 
-exports.getSummary = (req, res) => {
-    try {
+const Dashboard = {
+  getSummary: (id_user, callback) => {
+    const transactionSql = `
+      SELECT
+        COALESCE(SUM(CASE WHEN c.type = 'Income' THEN t.amount ELSE 0 END), 0) AS total_income,
+        COALESCE(SUM(CASE WHEN c.type = 'Expense' THEN t.amount ELSE 0 END), 0) AS total_expense,
+        COUNT(t.id_transaction) AS total_transaction
+      FROM transactions t
+      JOIN categories c
+        ON t.id_category = c.id_category
+      WHERE t.id_user = ?
+    `;
 
-        const id_user = req.user.id_user;
+    db.query(transactionSql, [id_user], callback);
+  },
 
-        const query = `
-            SELECT 
-                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS total_income,
-                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS total_expense
-            FROM transactions
-            WHERE id_user = ?
-        `;
+  getTotalSaving: (id_user, callback) => {
+    const sql = `
+      SELECT
+        COALESCE(SUM(current_amount), 0) AS total_saving
+      FROM saving_goals
+      WHERE id_user = ?
+    `;
 
-        db.query(query, [id_user], (err, result) => {
-            if (err) {
-                return res.status(500).json({
-                    message: "Database error",
-                    error: err.message
-                });
-            }
+    db.query(sql, [id_user], callback);
+  },
 
-            const data = result[0];
+  getMonthlyChart: (id_user, callback) => {
+    const sql = `
+      SELECT
+        DATE_FORMAT(t.transaction_date, '%Y-%m') AS month_key,
+        DATE_FORMAT(t.transaction_date, '%b %Y') AS month,
+        COALESCE(SUM(CASE WHEN c.type = 'Income' THEN t.amount ELSE 0 END), 0) AS income,
+        COALESCE(SUM(CASE WHEN c.type = 'Expense' THEN t.amount ELSE 0 END), 0) AS expense
+      FROM transactions t
+      JOIN categories c
+        ON t.id_category = c.id_category
+      WHERE t.id_user = ?
+      GROUP BY month_key, month
+      ORDER BY month_key ASC
+    `;
 
-            const income = data.total_income || 0;
-            const expense = data.total_expense || 0;
+    db.query(sql, [id_user], callback);
+  },
 
-            res.json({
-                message: "Dashboard summary berhasil",
-                data: {
-                    total_income: income,
-                    total_expense: expense,
-                    balance: income - expense
-                }
-            });
-        });
+  getRecentActivities: (id_user, callback) => {
+    const sql = `
+      SELECT
+        t.id_transaction AS id,
+        t.amount,
+        t.description AS title,
+        t.transaction_date,
+        c.name AS category,
+        c.type
+      FROM transactions t
+      JOIN categories c
+        ON t.id_category = c.id_category
+      WHERE t.id_user = ?
+      ORDER BY t.transaction_date DESC, t.id_transaction DESC
+      LIMIT 5
+    `;
 
-    } catch (error) {
-        res.status(500).json({
-            message: "Server error",
-            error: error.message
-        });
-    }
+    db.query(sql, [id_user], callback);
+  },
+
+  getLatestSavingGoal: (id_user, callback) => {
+    const sql = `
+      SELECT
+        id_goal,
+        goal_name,
+        target_amount,
+        current_amount,
+        target_date,
+        ROUND(
+          LEAST((current_amount / NULLIF(target_amount, 0)) * 100, 100)
+        ) AS progress
+      FROM saving_goals
+      WHERE id_user = ?
+      ORDER BY id_goal DESC
+      LIMIT 1
+    `;
+
+    db.query(sql, [id_user], callback);
+  },
 };
+
+module.exports = Dashboard;

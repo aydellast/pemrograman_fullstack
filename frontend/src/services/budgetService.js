@@ -1,13 +1,6 @@
 import api from "./api";
 
 export const getBudgets = async () => {
-  const token = localStorage.getItem("token");
-  
-  const response = await api.get("/budgets", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  
+  const response = await api.get("/budgets");
   return response.data;
 };

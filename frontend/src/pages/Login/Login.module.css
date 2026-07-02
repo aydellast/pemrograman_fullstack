@@ -8,7 +8,7 @@
 
 .authCard {
   width: min(430px, 100%);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-soft);
   border-radius: 30px;
@@ -47,6 +47,40 @@
   gap: 15px;
 }
 
+.passwordWrapper {
+  position: relative;
+}
+
+.passwordWrapper input {
+  padding-right: 78px;
+}
+
+.showButton {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  border: none;
+  border-radius: 10px;
+  padding: 7px 10px;
+  background: #fff0f6;
+  color: var(--dark-pink);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.errorBox {
+  background: #fff0f0;
+  border: 1px solid #ffd0d0;
+  color: #d64545;
+  border-radius: 16px;
+  padding: 12px;
+  margin: 18px 0;
+  font-weight: 800;
+  font-size: 14px;
+}
+
 .bottomText {
   display: block;
   margin-top: 20px;
@@ -56,4 +90,19 @@
 .bottomText a {
   color: var(--dark-pink);
   font-weight: 800;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media screen and (max-width: 520px) {
+  .authCard {
+    padding: 28px 22px;
+  }
+
+  .authCard h1 {
+    font-size: 28px;
+  }
 }
