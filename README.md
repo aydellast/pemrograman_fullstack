@@ -27,3 +27,7 @@ CuppyCash adalah aplikasi finance tracker berbasis web untuk mencatat pemasukan,
 cd backend
 npm install
 node app.js
+
+## Catatan
+
+Pastikan MySQL dan database CuppyCash sudah dibuat terlebih dahulu.
